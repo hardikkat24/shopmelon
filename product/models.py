@@ -60,7 +60,7 @@ class Product(models.Model):
 
 
 class Variant(models.Model):
-    type = models.CharField(choices=VARIANT_TYPE_CHOICES, null=False, blank=False)
+    type = models.CharField(max_length=1, choices=VARIANT_TYPE_CHOICES, null=False, blank=False)
     name = models.CharField(max_length=100, null=False, blank=False)
     quantity_available = models.IntegerField(null=False, blank=False)
     image = models.ImageField(upload_to='product/variant/images/', null=True, blank=True)
