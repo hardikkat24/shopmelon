@@ -1,0 +1,12 @@
+{% extends "user/base.html" %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block content %}
+<h1>Home</h1>
+<a href = "{% url 'customer-signup' %}">Customer Signup</a>
+<br>
+<a href = "{% url 'seller-signup' %}">Seller Signup</a>
+{% endblock %}

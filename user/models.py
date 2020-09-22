@@ -4,17 +4,26 @@ from django.contrib.auth.models import AbstractUser
 from PIL import Image
 
 class CustomUser(AbstractUser):
-    username = None
     email = models.EmailField(max_length=255, unique=True)
-    image = models.ImageField(upload_to='user/customuser/images/', default='default/user_image.jpg')
+    image = models.ImageField(upload_to='user/customuser/images/', default='default/user_image.jpg', blank=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.email
 
+    def create_superuser(self, username=None, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
     def save(self, *args, **kwargs):
+        self.username = self.email
         super().save(*args, **kwargs)
 
         img = Image.open(self.image.path)

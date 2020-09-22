@@ -1,3 +1,4 @@
 from django.contrib import admin
+from .models import CustomUser, Customer, Seller, Address
 
-# Register your models here.
+admin.site.register([CustomUser, Customer, Seller, Address])

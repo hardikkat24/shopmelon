@@ -38,8 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'crispy_forms',
+
     'user',
     'product',
+    'order',
 ]
 
 AUTH_USER_MODEL = 'user.CustomUser'
@@ -125,5 +128,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Custom additions
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
