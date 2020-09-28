@@ -143,3 +143,9 @@ def update_profile(request):
     }
 
     return render(request, 'user/update_profile.html', context)
+
+
+
+
+def basic_home(request):
+    return render(request, 'user/basic_home.html')
