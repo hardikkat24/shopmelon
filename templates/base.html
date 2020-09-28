@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -17,6 +18,11 @@
         <li class="nav-item">
             <a href = "{% url 'profile' %}" class = "nav-link">Hello {{ user.first_name }} {{ user.last_name }}</a>
         </li>
+        {% if user.seller %}
+        <li class="nav-item">
+            <a href = "{% url 'manage-products' %}" class = "nav-link">Manage Products</a>
+        </li>
+        {% endif %}
     </ul>
     </nav>
 
@@ -31,16 +37,19 @@
     </nav>
     {% endif %}
 
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        {{ message }}
+        </div>
+    {% endfor %}
 
     <div class="container">
         {% block content %}
         {% endblock %}
     </div>
+    {% block script %}
+    {% endblock %}
 </body>

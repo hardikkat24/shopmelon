@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{{ product.name }}
+{% endblock %}
+
+{% block content %}
+<h1>{{ product.name }}</h1>
+<img src="{{ product.image_url }}">
+<p><b>PRICE: {{ product.unit_price }}</b></p>
+<p><b>MRP: {{ product.unit_mrp }}</b></p>
+<p><b>You save: {{ product.discount_price }}Rs ({{ product.discount_percent | floatformat:2 }}%) </b></p>
+<p><b>Tags: </b>{% for tag in tags %}{{ tag }}  {% endfor %}</p>
+<table>
+    <tr>
+        <td>Description</td>
+        <td>{{ product.description }}</td>
+    </tr>
+    <tr>
+        <td>Category</td>
+        <td>{{ product.category }}</td>
+    </tr>
+    <tr>
+        <td>Style</td>
+        <td>{{ product.style }}</td>
+    </tr>
+    <tr>
+        <td>Note</td>
+        <td>{{ product.note }}</td>
+    </tr>
+</table>
+<br>
+<br>
+<table>
+    {% for variant in variants %}
+    {% if variant.is_available %}
+    <tr class="option">
+        <td>
+            <input type="checkbox" autocomplete="off" name="product" value="{{ variant.pk }}" class = "variant-cbox"/>
+        </td>
+        <td>
+            {{ variant.get_type_display }}: {{ variant.name }}
+        </td>
+        <td>
+            <img src = "{{ variant.image_url }}">
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+{% endblock %}

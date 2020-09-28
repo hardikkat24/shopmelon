@@ -1,4 +1,4 @@
-{% extends "user/base.html" %}
+{% extends "base.html" %}
 
 {% block title %}
 Home
@@ -6,7 +6,8 @@ Home
 
 {% block content %}
 <h1>Home</h1>
-<a href = "{% url 'customer-signup' %}">Customer Signup</a>
+<a href = "{% url 'customer-signup' %}" class = "btn btn-primary">Customer Signup</a>
 <br>
-<a href = "{% url 'seller-signup' %}">Seller Signup</a>
+<br>
+<a href = "{% url 'seller-signup' %}" class = "btn btn-primary">Seller Signup</a>
 {% endblock %}

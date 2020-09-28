@@ -7,10 +7,12 @@ Signup
 
 {% block content %}
 <h1>Signup</h1>
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ user_form | crispy }}
-    {{ customer_form | crispy }}
+    {{ form1 | crispy }}
+    {% if is_customer_or_seller %}
+        {{ form2 | crispy }}
+    {% endif %}
     <button type = "submit" class = "btn btn-primary">Sign Up</button>
 </form>
 {% endblock %}

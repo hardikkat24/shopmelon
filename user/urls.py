@@ -18,4 +18,8 @@ urlpatterns = [
     # change password urls
     path('change-password/',auth_views.PasswordChangeView.as_view(template_name='user/change_password.html', success_url='done'),name='change-password'),
     path('change-password/done/', auth_views.PasswordChangeDoneView.as_view(template_name='user/change_password_done.html'), name='change-password-done'),
+
+    # profile related urls
+    path('profile/', views.profile, name='profile'),
+    path('update-profile/', views.update_profile, name='update-profile'),
 ]

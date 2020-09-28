@@ -8,6 +8,11 @@ class CustomUserCreationForm(UserCreationForm):
         model = CustomUser
         fields = ('email', 'first_name', 'last_name', 'image')
 
+class CustomUserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'first_name', 'last_name', 'image')
+        exclude = ('password', 'password2')
 
 class CustomerCreationForm(forms.ModelForm):
     class Meta:

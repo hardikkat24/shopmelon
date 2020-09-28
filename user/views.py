@@ -1,12 +1,21 @@
 from django.shortcuts import render, redirect
-from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm, CustomUserUpdateForm
 
 
 def home(request):
+    """
+    Home page
+    """
     return render(request, 'user/home.html')
 
 
 def customer_signup(request):
+    """
+    Signup view for Customers
+    """
     if request.method == 'POST':
         user_form = CustomUserCreationForm(request.POST)
         customer_form = CustomerCreationForm(request.POST)
@@ -15,7 +24,8 @@ def customer_signup(request):
             customer = customer_form.save(commit=False)
             customer.user = user
             customer.save()
-            return redirect('home')
+            messages.success(request, "Profile created successfully!")
+            return redirect('login')
     else:
         user_form = CustomUserCreationForm()
         customer_form = CustomerCreationForm()
@@ -28,6 +38,9 @@ def customer_signup(request):
 
 
 def seller_signup(request):
+    """
+    Signup view for Sellers
+    """
     if request.method == 'POST':
         user_form = CustomUserCreationForm(request.POST)
         seller_form = SellerCreationForm(request.POST)
@@ -36,7 +49,8 @@ def seller_signup(request):
             seller = seller_form.save(commit=False)
             seller.user = user
             seller.save()
-            return redirect('home')
+            messages.success(request, "Profile created successfully!")
+            return redirect('login')
     else:
         user_form = CustomUserCreationForm()
         seller_form = SellerCreationForm()
@@ -46,3 +60,86 @@ def seller_signup(request):
         'seller_form': seller_form,
     }
     return render(request, 'user/seller_signup.html', context)
+
+
+@login_required
+def profile(request):
+    """
+    Profile view for Customer/Seller/None
+    """
+    user = request.user
+
+    if hasattr(user, 'customer'):
+        customer = user.customer
+        context = {
+            'user': user,
+            'is_customer': True,
+            'is_seller': False,
+            'customer': customer,
+        }
+    elif hasattr(user, 'seller'):
+        seller = user.seller
+        context = {
+            'user': user,
+            'is_customer': False,
+            'is_seller': True,
+            'seller': seller,
+        }
+    else:
+        context = {
+            'user': user,
+            'is_customer': False,
+            'is_seller': False,
+        }
+
+    return render(request, 'user/profile.html', context)
+
+
+@login_required
+def update_profile(request):
+    """
+    Update profile view for Customer/Seller/None
+    """
+    user = request.user
+
+    if request.method == 'POST':
+        form1 = CustomUserUpdateForm(request.POST, request.FILES,instance=user)
+        is_customer_or_seller = True
+        if hasattr(user, 'customer'):
+            customer = user.customer
+            form2 = CustomerCreationForm(request.POST, request.FILES, instance=customer)
+        elif hasattr(user, 'seller'):
+            seller = user.seller
+            form2 = SellerCreationForm(request.POST, request.FILES, instance=seller)
+        else:
+            is_customer_or_seller = False
+            form2 = None
+
+        if form1.is_valid() and (not is_customer_or_seller or form2.is_valid()) :
+            form1.save()
+            if is_customer_or_seller:
+                form2.save()
+
+            messages.success(request, "Profile updated successfully!")
+            return redirect('profile')
+
+    else:
+        form1 = CustomUserUpdateForm(instance=user)
+        is_customer_or_seller = True
+        if hasattr(user, 'customer'):
+            customer = user.customer
+            form2 = CustomerCreationForm(instance=customer)
+        elif hasattr(user, 'seller'):
+            seller = user.seller
+            form2 = SellerCreationForm(instance=seller)
+        else:
+            is_customer_or_seller = False
+            form2 = None
+
+    context = {
+        'form1': form1,
+        'form2': form2,
+        'is_customer_or_seller': is_customer_or_seller,
+    }
+
+    return render(request, 'user/update_profile.html', context)

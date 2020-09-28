@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Manage Tags
+{% endblock %}
+
+{% block content %}
+<h1>Manage Tags for {{ product.name }}</h1>
+<input type="hidden" value="{{ product.id }}" id="product_id">
+<form method="POST" enctype="multipart/form-data" class = "formset">
+    {% csrf_token %}
+    {{ form | crispy }}
+    <table>
+        <tr>
+            <td>Select</td>
+            <td>Tag</td>
+        </tr>
+        {% for tag in tags %}
+        <tr id="tag-{{ tag.id }}">
+            <td><input type="checkbox" autocomplete="off" name="product" value="{{ tag.pk }}" class = "tag-cbox"/></td>
+            <td>{{ tag.name }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button class = "btn btn-danger delete-tags">Delete selected tags</button>
+    <hr>
+    <button type = "submit" class = "btn btn-primary">Save</button>
+    <a href = "{% url 'product-description' product.pk %}" class="btn btn-primary">View Product</a>
+</form>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    var arr=[]
+
+    var event_handler = function (e){
+        console.log('clicked')
+        if ($(this).prop('checked')){
+            arr.push($(this).val())
+
+            console.log('add: ' + $(this).val() )
+        }
+        else{
+            let index = arr.indexOf($(this).val())
+            if(index > -1){
+                arr.splice(index, 1);
+                console.log("remove " + $(this).val())
+            }
+        }
+    }
+
+    $(document).on('click', '.tag-cbox', event_handler)
+
+    $(document).on('click', '.delete-tags', function (e){
+        e.preventDefault()
+        console.log(arr)
+        let myurl = '/product/delete-tags/'
+
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'tags': JSON.stringify(arr),
+                'product_id': $('#product_id').val()
+            },
+            dataType: 'json',
+            success: function (){
+                console.log('success')
+                for(id of arr){
+                    $('#tag-'+id).remove()
+                }
+            }
+        })
+    })
+
+</script>
+{% endblock %}

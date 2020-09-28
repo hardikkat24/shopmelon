@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Add Product
+{% endblock %}
+
+{% block content %}
+<h1>Add Product</h1>
+<form method="POST" enctype="multipart/form-data" class = "formset">
+    {% csrf_token %}
+    {{ form | crispy }}
+     <hr>
+    {{ formset.management_form }}
+    {% for variant_form in formset %}
+        <div class = "form-row">
+            {{ variant_form | crispy }}
+        </div>
+    {% endfor %}
+    <button class = "btn btn-primary add-form-row">Add Variant</button>
+    <button class = "btn btn-primary remove-form-row">Remove Variant</button>
+    <hr>
+    <br>
+    <button type = "submit" class = "btn btn-primary">Add tags</button>
+</form>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    total = 1
+    function updateElementIndex(el, prefix, ndx) {
+        var id_regex = new RegExp('(' + prefix + '-\\d+)');
+        var replacement = prefix + '-' + ndx;
+        if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+        if (el.id) el.id = el.id.replace(id_regex, replacement);
+        if (el.name) el.name = el.name.replace(id_regex, replacement);
+    }
+
+    function cloneMore(selector, prefix){
+        var newElement = $(selector).clone(true)
+        var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+
+        newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
+            var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+        });
+        newElement.find('label').each(function() {
+            var forValue = $(this).attr('for');
+            if (forValue) {
+              forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+              $(this).attr({'for': forValue});
+            }
+        });
+        total++;
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+        $(selector).after(newElement);
+    }
+
+    function deleteForm(prefix, btn) {
+        var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+        if (total > 1){
+            $('.form-row:last').remove();
+            var forms = $('.form-row');
+            $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+            // for (var i=0, formCount=forms.length; i<formCount; i++) {
+            //     $(forms.get(i)).find(':input').each(function() {
+            //         updateElementIndex(this, prefix, i);
+            //     });
+            // }
+        }
+        return false;
+    }
+
+    $(document).on('click', '.add-form-row', function (e){
+        e.preventDefault()
+        cloneMore('.form-row:last', 'form')
+        return false
+    })
+
+    $(document).on('click', '.remove-form-row', function(e){
+        e.preventDefault();
+        deleteForm('form', $(this));
+        return false;
+    });
+
+    checkbox = $('#id_has_variants')
+    if(checkbox.prop('checked')){
+            $('.add-form-row').show()
+            $('.remove-form-row').show()
+        }
+        else{
+            $('.add-form-row').hide()
+            $('.remove-form-row').hide()
+    }
+    $(document).on('click', '#id_has_variants', function (e){
+        checkbox = $('#id_has_variants')
+        if(checkbox.prop('checked')){
+            $('.add-form-row').show()
+            $('.remove-form-row').show()
+        }
+        else{
+            $('.add-form-row').hide()
+            $('.remove-form-row').hide()
+        }
+
+    })
+</script>
+{% endblock %}

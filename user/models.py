@@ -13,6 +13,14 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
 
+    @property
+    def image_url(self):
+        try:
+            url = self.image.url
+        except:
+            url = ''
+        return url
+
     def create_superuser(self, username=None, email=None, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -52,6 +60,8 @@ class Seller(models.Model):
     customer_contact_phone = models.CharField(max_length=10, null=True, blank=True)
     customer_contact_email = models.EmailField(max_length=255, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
+    aadhar_no = models.CharField(max_length=12, null=False, blank=False)
+    pan_no = models.CharField(max_length=10, null=False, blank=False)
 
     def __str__(self):
         return str(self.business_name) + ": " + str(self.user)

@@ -1,4 +1,4 @@
-{% extends "user/base.html" %}
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
 
 
@@ -13,7 +13,7 @@ Login
 <form method="POST">
     {% csrf_token %}
     {{ form | crispy }}
-    <button type = "submit">Log In</button>
+    <button type = "submit" class = "btn btn-primary">Log In</button>
 </form>
 
 

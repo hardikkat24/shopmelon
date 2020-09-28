@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{% block content %}
+<h1>Profile</h1>
+<img src="{{ user.image_url }}">
+<div>First Name: {{ user.first_name }}</div>
+<div>Last Name: {{ user.last_name }}</div>
+<div>Email: {{ user.email }}</div>
+{% if is_customer %}
+    <div>Phone: {{ customer.phone }}</div>
+    <div>Phone Verification: {% if customer.is_phone_verified %}Complete{% else %}Not Verified{% endif %}</div>
+{% endif %}
+{% if is_seller %}
+    <div>Business Name: {{ seller.business_name }}</div>
+    <div>Phone: {{ seller.phone }}</div>
+    <div>Customer Contact Phone: {{ seller.customer_contact_phone }}</div>
+    <div>Customer Contact Email: {{ seller.customer_contact_email }}</div>
+    <div>Aadhar Number: {{ seller.aadhar_no }}</div>
+    <div>PAN Number: {{ seller.pan_no }}</div>
+    <div>Verified: {% if seller.is_verified %}Complete{% else %}Not Verified{% endif %}</div>
+{% endif %}
+<a href = "{% url 'update-profile' %}" class = "btn btn-primary">Update Profile</a>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Update Product
+{% endblock %}
+
+{% block content %}
+<h1>Update Product</h1>
+<form method="POST" enctype="multipart/form-data" class = "formset">
+    {% csrf_token %}
+    {{ form | crispy }}
+     <hr>
+    {{ formset.management_form }}
+    {% for variant_form in formset %}
+        <div class = "form-row">
+            {{ variant_form | crispy }}
+            <div class="right">
+                <button class = "btn btn-danger btn-sm text-white delete-variant">
+                    &times;
+                </button>
+            </div>
+        </div>
+    <hr>
+    {% endfor %}
+    <button class = "btn btn-primary add-form-row">Add Variant</button>
+    <hr>
+    <br>
+    <button type = "submit" class = "btn btn-primary">Create</button>
+</form>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+
+
+    function cloneMore(selector, prefix){
+        var newElement = $(selector).clone(true)
+        var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+
+        newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset]):not(button)').each(function() {
+
+            var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+        });
+        newElement.find('label').each(function() {
+            var forValue = $(this).attr('for');
+            if (forValue) {
+              forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+              $(this).attr({'for': forValue});
+            }
+        });
+        total++;
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+        $(selector).after(newElement);
+    }
+
+    $(document).on('click', '.add-form-row', function (e){
+        e.preventDefault()
+        cloneMore('.form-row:last', 'form')
+        return false
+    })
+
+    function reIndex(){
+        formrows = $('.form-row')
+        formrows.each(function (total){
+            this.find(':input:not([type=button]):not([type=submit]):not([type=reset]):not(button)').each(function() {
+
+                var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+                var id = 'id_' + name;
+                $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+            });
+            this.find('label').each(function() {
+                var forValue = $(this).attr('for');
+                if (forValue) {
+                  forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+                  $(this).attr({'for': forValue});
+                }
+            });
+        })
+    }
+
+    checkbox = $('#id_has_variants')
+    if(checkbox.prop('checked')){
+            $('.add-form-row').show()
+        }
+        else{
+            $('.add-form-row').hide()
+    }
+    $(document).on('click', '#id_has_variants', function (e){
+        checkbox = $('#id_has_variants')
+        if(checkbox.prop('checked')){
+            $('.add-form-row').show()
+        }
+        else{
+            $('.add-form-row').hide()
+        }
+    })
+
+    $(document).on('click', '.delete-variant', function (e){
+        e.preventDefault()
+        row = e.target.parentElement.parentElement
+        row = $(row)
+        id = row.children('input').val()
+        x = $('#id_' + 'form' + '-TOTAL_FORMS').val();
+        x--;
+        $('#id_' + 'form' + '-TOTAL_FORMS').val(x);
+        if(id == ''){
+            row.remove()
+            reIndex()
+            return
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/product/delete-variant/',
+            data: {
+                'id': id
+            },
+            dataType: 'json',
+            success: function (data){
+                t = $('#id_' + 'form' + '-INITIAL_FORMS').val();
+                t--;
+                $('#id_' + 'form' + '-INITIAL_FORMS').val(t);
+                row.remove()
+                reIndex()
+            }
+        })
+    })
+</script>
+{% endblock %}
