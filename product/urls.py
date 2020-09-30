@@ -25,5 +25,7 @@ urlpatterns = [
     path('delete-variant/', views.ajax_delete_variant, name='delete-variant'),
     path('product-description/<pk>/', views.product_description, name='product-description'),
 
+    path('search/', views.search, name='search'),
+
     path('manage-products/', views.manage_products, name='manage-products'),
 ]

@@ -8,8 +8,89 @@ Search
 {% block content %}
 <h1>Products</h1>
 <div>
-    {% for product in products %}
-    
+    <div>
+
+    </div>
+
+    <form method="GET">
+        <p class = "text-danger">{{ form.non_field_errors }}</p>
+
+        {% for h in forms.hidden_fields %}
+        <p class = "text-danger">{{ h.errors }}
+        {{ h }}</p>
+        {% endfor %}
+
+            <table class="mx-auto">
+                {% for f in form.visible_fields %}
+                <tr>
+                    <td class="align-top">{{ f.label }}</td>
+                    <td>
+                        {{ f }}
+                        <p class = "text-danger">{{ f.errors }}</p>
+                        <p class = "text-info">{{ f.help_text }}</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <button type = "submit" class = "btn btn-primary mx-auto">Search</button>
+
+    </form>
+    {% if products.has_other_pages %}
+    <ul class="pagination">
+    {% if products.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+    <li class="disabled page-item"><span class="page-link">&laquo;</span></li>
+    {% endif %}
+    {% for i in products.paginator.page_range %}
+    {% if products.number == i %}
+    <li class="active page-item"><span class="page-link">{{ i }} <span class="sr-only">(current)</span></span></li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+    {% endif %}
     {% endfor %}
+    {% if products.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">&raquo;</a></li>
+    {% else %}
+    <li class="disabled page-item"><span class="page-link">&raquo;</span></li>
+    {% endif %}
+    </ul>
+    {% endif %}
+    <div class="row center">
+    {% for product in products %}
+
+        <div class="product card col-4 p-3">
+            <a href = "{% url 'product-description' product.pk %}">
+                <img class="card-img" src="{{ product.image_url }}">
+                <div class="card-body">
+                    <div class="card-title">{{ product.name }}</div>
+                </div>
+            </a>
+        </div>
+
+    {% endfor %}
+    </div>
+    {% if products.has_other_pages %}
+    <ul class="pagination">
+    {% if products.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+    <li class="disabled page-item"><span class="page-link">&laquo;</span></li>
+    {% endif %}
+    {% for i in products.paginator.page_range %}
+    {% if products.number == i %}
+    <li class="active page-item"><span class="page-link">{{ i }} <span class="sr-only">(current)</span></span></li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+    {% endif %}
+    {% endfor %}
+    {% if products.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">&raquo;</a></li>
+    {% else %}
+    <li class="disabled page-item"><span class="page-link">&raquo;</span></li>
+    {% endif %}
+    </ul>
+    {% endif %}
 </div>
 {% endblock %}

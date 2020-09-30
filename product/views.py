@@ -6,8 +6,8 @@ from django.http import HttpResponseNotFound, HttpResponseNotAllowed, JsonRespon
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from product.models import Product, Variant, Tag
-from .forms import ProductCreationForm, VariantFormset, VariantFormsetUpdate, TagCreationForm
+from product.models import Product, Variant, Tag, Category
+from .forms import ProductCreationForm, VariantFormset, VariantFormsetUpdate, TagCreationForm, ProductFilterForm
 
 
 @login_required
@@ -106,10 +106,44 @@ def update_product(request, pk):
     return render(request, 'product/update_product.html', context)
 
 
-def products(request):
-    products = Product.objects.all()
+def search(request):
+    form = ProductFilterForm(request.GET)
+
+    if form.is_valid():
+        print(form.cleaned_data)
+        text = form.cleaned_data['text']
+        category_pk = form.cleaned_data['category']
+        price_gt = form.cleaned_data['price_gt']
+        price_lt = form.cleaned_data['price_lt']
+
+        # text handling
+        if text.strip() != '':
+            list = [x.strip().lower() for x in text.split(' ')]
+            tags = Tag.objects.filter(name__in=list)
+            products = Product.objects.none()
+            for tag in tags:
+                products = products | tag.product_set.all()
+            products = products.distinct()
+        else:
+            products = Product.objects.all()
+
+        # category handling
+        if category_pk != '0' and category_pk != '':
+            category = Category.objects.get(pk=category_pk)
+            products = products.filter(category=category)
+
+        if (price_lt is not None and price_lt is not None):
+            products = products.filter(unit_price__gte=price_gt, unit_price__lte=price_lt)
+        elif price_lt is not None:
+            products = products.filter(unit_price__lte=price_lt)
+        elif price_gt is not None:
+            products = products.filter(unit_price__gte=price_gt)
+    else:
+        products = Product.objects.all()
+
+    products = products.distinct()
     page = request.GET.get('page', 1)
-    paginator = Paginator(products, 20)
+    paginator = Paginator(products, 10)
 
     try:
         paginated_products = paginator.page(page)
@@ -120,6 +154,7 @@ def products(request):
 
     context = {
         'products': paginated_products,
+        'form': form,
     }
     return render(request, 'product/products.html', context)
 
@@ -198,7 +233,7 @@ def tags(request, pk):
             tags = [x.strip() for x in form.cleaned_data['tags'].split(',')]
             objList = []
             for tag in tags:
-                objList.append(Tag.objects.get_or_create(name=tag)[0])
+                objList.append(Tag.objects.get_or_create(name=tag.lower())[0])
             product.tags.add(*objList)
     else:
         form = TagCreationForm()
