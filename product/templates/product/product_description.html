@@ -37,7 +37,7 @@
     {% if variant.is_available %}
     <tr class="option">
         <td>
-            <input type="checkbox" autocomplete="off" name="product" value="{{ variant.pk }}" class = "variant-cbox"/>
+            <input type="radio" autocomplete="off" name="variant" value="{{ variant.pk }}" class = "variant-cbox"/>
         </td>
         <td>
             {{ variant.get_type_display }}: {{ variant.name }}
@@ -49,4 +49,42 @@
     {% endif %}
     {% endfor %}
 </table>
+<div class="form-group row">
+    <input type="number" name="quantity" class="form-control col-1" id="quantity">
+    <button class = "btn btn-primary" id = "add-to-cart">Add to Cart</button>
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $(document).on('click', '#add-to-cart', function(e){
+        quantity = $('#quantity').val()
+        variant_pk = $('input[name=variant]:checked').val()
+        console.log(quantity)
+        console.log(variant_pk)
+
+        myurl = '/order/add-to-cart/'
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'quantity': quantity,
+                'variant_pk': variant_pk
+            },
+            dataType: 'json',
+            success: function (data){
+                console.log(data)
+                $('.alert').remove()
+                str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                        data.message +
+                        '</div>'
+                $('nav').after(str)
+            }
+        })
+    })
+
+
+
+</script>
 {% endblock %}

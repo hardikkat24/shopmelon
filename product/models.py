@@ -103,6 +103,9 @@ class Variant(models.Model):
             url = ''
         return url
 
+    def can_order(self, quantity):
+        return self.quantity_available >= quantity
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         try:

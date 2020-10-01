@@ -20,15 +20,27 @@ class Order(models.Model):
     is_shipped = models.BooleanField(default=False)
     is_cancelled = models.BooleanField(default=False)
 
+    def get_total_amount_and_quantity(self):
+        quantity = amount = 0
+        order_items = self.orderitem_set.all().prefetch_related('variant', 'variant__product')
+        for order_item in order_items:
+            quantity = quantity + order_item.quantity
+            amount = amount + order_item.quantity*order_item.variant.product.unit_price
+
+        return (amount, quantity)
+
     def __str__(self):
-        return str(self.pk) + self.customer
+        return str(self.pk) + str(self.customer)
 
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(default=1)
+
+    @property
+    def total_amount(self):
+        return self.quantity * self.variant.product.unit_price
 
 
 class Payment(models.Model):
