@@ -14,12 +14,11 @@ Cart
         </div>
     {% else %}
         <div>
-            <b>Total items: {{ quantity }}<br>
-                Total amount: {{ amount }}<br></b>
+            <b>Total items: <span id="quantity">{{ quantity }}</span><br>
+                Total amount: <span id="amount">{{ amount }}</span><br></b>
             <table class="table">
                 <thead>
                     <tr>
-                        <td>S. No.</td>
                         <td>Image</td>
                         <td>Name</td>
                         <td>Quantity</td>
@@ -29,7 +28,6 @@ Cart
                 </thead>
                 {% for order_item in order_items %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
                     <td><img width="200px" src = "{{ order_item.variant.product.image_url }}"></td>
                     <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
                     <td>{{ order_item.quantity }}</td>
@@ -46,7 +44,28 @@ Cart
 {% block script %}
 <script type="text/javascript">
     $(document).on('click', '.delete-item', function (e){
-        console.log($(this).attr('data-id'))
+        var val = $(this).attr('data-id')
+        row = $(this).parent().parent()
+        myurl = '/order/ajax-delete-from-cart/'
+
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'order_item_pk': val
+            },
+            dataType: 'json',
+            success: function (data){
+                row.remove()
+                $('.alert').remove()
+                str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                        data.message +
+                        '</div>'
+                $('nav').after(str)
+                $('#quantity').text(data.quantity)
+                $('#amount').text(data.amount)
+            }
+        })
     })
 </script>
 {% endblock %}

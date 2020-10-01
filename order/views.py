@@ -43,11 +43,8 @@ def cart(request):
 
     try:
         order = Order.objects.get(customer=user.customer, is_order_placed=False)
-        print(order)
         order_items = order.orderitem_set.all()
-        print(order_items)
         amount, quantity = order.get_total_amount_and_quantity()
-        print(amount, quantity)
         context = {
             'cart_is_empty': False,
             'order': order,
@@ -63,3 +60,28 @@ def cart(request):
         }
 
     return render(request, 'order/cart.html', context)
+
+
+@csrf_exempt
+@login_required
+def ajax_delete_from_cart(request):
+    user = request.user
+
+    order_item_pk = request.POST.get('order_item_pk', 0)
+    if order_item_pk == '':
+        return JsonResponse({'message': 'Invalid data.', 'type': 'danger'})
+
+    try:
+        order_item = OrderItem.objects.get(pk=order_item_pk)
+    except:
+        return JsonResponse({'message': 'No such item in cart.', 'type': 'info'})
+
+    if not order_item.order.customer == user.customer:
+        return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+
+    order = order_item.order
+    order_item.delete()
+
+    amount, quantity = order.get_total_amount_and_quantity()
+    return JsonResponse({'message': 'Item successfully removed from cart', 'type': 'success', 'change': True, 'quantity':quantity, 'amount': amount})
+
