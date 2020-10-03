@@ -65,10 +65,8 @@
         var cart = getCookie('cart')
 		if (cart == undefined){
 			cart = 0
-			console.log('Cart Created!', cart)
 			document.cookie ='cart=' + cart + ";domain=;path=/;SameSite=Lax;"
 		}
-		console.log('Cart:', cart)
 
         myurl = '/order/add-to-cart/'
         if (quantity>0){

@@ -33,13 +33,10 @@ def ajax_add_to_cart(request):
         order, _ = Order.objects.get_or_create(customer=user.customer, is_order_placed=False)
     else:
         cart = request.POST.get('cart')
-        print(cart+ "_______________________________________________")
         if cart == '0': # no cart created previously
-            print('------------0')
             order = Order.objects.create()
             created_cart = True
         else:
-            print('----------------1')
             order = Order.objects.get(pk=cart)
             created_cart = False
     order_item, _ = OrderItem.objects.get_or_create(order = order, variant=variant)
@@ -53,10 +50,10 @@ def cart(request):
     user = request.user
 
     try:
-        if user.is_authenticated():
+        if user.is_authenticated:
             order = Order.objects.get(customer=user.customer, is_order_placed=False)
         else:
-            order = Order.objects.get()
+            order = Order.objects.get(pk = request.COOKIES.get('cart'))
         order_items = order.orderitem_set.all()
         amount, quantity = order.get_total_amount_and_quantity()
         context = {
@@ -68,7 +65,6 @@ def cart(request):
         }
 
     except:
-        print('here')
         context = {
             'cart_is_empty': True,
         }
