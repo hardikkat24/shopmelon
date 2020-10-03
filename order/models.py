@@ -10,7 +10,7 @@ PAYMENT_TYPE_CHOICES = [
 ]
 
 class Order(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_ordered = models.DateTimeField(null=True, blank=True)
     date_shipped = models.DateTimeField(null=True, blank=True)

@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.shortcuts import get_current_site
 
 from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm, CustomUserUpdateForm
-
+from verification.verification_utils import send_cofirmation_mail
 
 def home(request):
     """
@@ -20,11 +21,17 @@ def customer_signup(request):
         user_form = CustomUserCreationForm(request.POST)
         customer_form = CustomerCreationForm(request.POST)
         if user_form.is_valid() and customer_form.is_valid():
-            user = user_form.save()
+            user = user_form.save(commit=False)
+            user.is_active = False
+            user.save()
+
+            current_site = get_current_site(request)
+            send_cofirmation_mail(user, current_site)
+
             customer = customer_form.save(commit=False)
             customer.user = user
             customer.save()
-            messages.success(request, "Profile created successfully!")
+            messages.success(request, "Profile created successfully! Please confirm you email id.")
             return redirect('login')
     else:
         user_form = CustomUserCreationForm()

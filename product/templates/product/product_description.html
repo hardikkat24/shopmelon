@@ -61,29 +61,38 @@
     $(document).on('click', '#add-to-cart', function(e){
         quantity = $('#quantity').val()
         variant_pk = $('input[name=variant]:checked').val()
-        console.log(quantity)
-        console.log(variant_pk)
+
+        var cart = getCookie('cart')
+		if (cart == undefined){
+			cart = 0
+			console.log('Cart Created!', cart)
+			document.cookie ='cart=' + cart + ";domain=;path=/;SameSite=Lax;"
+		}
+		console.log('Cart:', cart)
 
         myurl = '/order/add-to-cart/'
-        $.ajax({
-            type: 'POST',
-            url: myurl,
-            data: {
-                'quantity': quantity,
-                'variant_pk': variant_pk
-            },
-            dataType: 'json',
-            success: function (data){
-                console.log(data)
-                $('.alert').remove()
-                str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
-                        data.message +
-                        '</div>'
-                $('nav').after(str)
-            }
-        })
+        if (quantity>0){
+            $.ajax({
+                type: 'POST',
+                url: myurl,
+                data: {
+                    'quantity': quantity,
+                    'variant_pk': variant_pk,
+                    'cart': cart
+                },
+                dataType: 'json',
+                success: function (data){
+                    console.log(data)
+                    document.cookie ='cart=' + data.cart + ";domain=;path=/;SameSite=Lax;"
+                    $('.alert').remove()
+                    str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                            data.message +
+                            '</div>'
+                    $('nav').after(str)
+                },
+            })
+        }
     })
-
 
 
 </script>
