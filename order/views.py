@@ -35,15 +35,16 @@ def ajax_add_to_cart(request):
         cart = request.POST.get('cart')
         if cart == '0': # no cart created previously
             order = Order.objects.create()
-            created_cart = True
         else:
-            order = Order.objects.get(pk=cart)
-            created_cart = False
+            try:
+                order = Order.objects.get(pk=cart)
+            except:
+                order = Order.objects.create()
     order_item, _ = OrderItem.objects.get_or_create(order = order, variant=variant)
     order_item.quantity = quantity
     order_item.save()
 
-    return JsonResponse({'message': 'Item successfully added to cart', 'type': 'success', 'created_cart': created_cart, 'cart': order.pk})
+    return JsonResponse({'message': 'Item successfully added to cart', 'type': 'success', 'cart': order.pk})
 
 
 def cart(request):
