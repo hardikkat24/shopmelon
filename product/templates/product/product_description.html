@@ -60,6 +60,9 @@
 <script type="text/javascript">
     $(document).on('click', '#add-to-cart', function(e){
         quantity = $('#quantity').val()
+        if (quantity === ''){
+            quantity = 1
+        }
         variant_pk = $('input[name=variant]:checked').val()
 
         var cart = getCookie('cart')

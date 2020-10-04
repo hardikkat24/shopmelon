@@ -56,6 +56,8 @@ def cart(request):
         else:
             order = Order.objects.get(pk = request.COOKIES.get('cart'))
         order_items = order.orderitem_set.all()
+        if len(order_items) == 0:
+            raise Exception("Sorry, no numbers below zero")
         amount, quantity = order.get_total_amount_and_quantity()
         context = {
             'cart_is_empty': False,

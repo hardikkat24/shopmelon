@@ -56,6 +56,10 @@ Cart
             },
             dataType: 'json',
             success: function (data){
+                if (data.quantity == 0){
+                    location.reload()
+                    return
+                }
                 row.remove()
                 $('.alert').remove()
                 str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
