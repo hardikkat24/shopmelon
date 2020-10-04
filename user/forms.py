@@ -24,3 +24,7 @@ class SellerCreationForm(forms.ModelForm):
     class Meta:
         model = Seller
         exclude = ('is_verified', 'user')
+
+
+class EmailResendForm(forms.Form):
+    email = forms.EmailField(required=True)

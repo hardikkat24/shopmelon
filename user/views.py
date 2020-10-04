@@ -3,8 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 
-from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm, CustomUserUpdateForm
+from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm, CustomUserUpdateForm, EmailResendForm
 from verification.verification_utils import send_cofirmation_mail
+from user.models import CustomUser
+from order.models import Order
 
 def home(request):
     """
@@ -31,6 +33,14 @@ def customer_signup(request):
             customer = customer_form.save(commit=False)
             customer.user = user
             customer.save()
+
+            # save cart from cookies if it exists for user as he signs up
+            try:
+                order = Order.objects.get(pk=request.COOKIES.get('cart'))
+                order.customer = customer
+                order.save()
+            except:
+                pass
             messages.success(request, "Profile created successfully! Please confirm you email id.")
             return redirect('login')
     else:
@@ -151,6 +161,30 @@ def update_profile(request):
 
     return render(request, 'user/update_profile.html', context)
 
+
+def resend_confirmation_email(request):
+    if request.method == 'POST':
+        form = EmailResendForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email', None)
+            try:
+                user = CustomUser.objects.get(email=email)
+                if user.is_active:
+                    messages.info(request, 'Email ID already verified')
+                else:
+                    current_site = get_current_site(request)
+                    send_cofirmation_mail(user, current_site)
+                    messages.success(request, 'Mail sent successfully, please check your inbox.')
+            except:
+                messages.info(request, 'Invalid Email ID')
+    else:
+        form = EmailResendForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'user/resend_email.html', context)
 
 
 

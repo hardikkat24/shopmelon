@@ -22,4 +22,6 @@ urlpatterns = [
     # profile related urls
     path('profile/', views.profile, name='profile'),
     path('update-profile/', views.update_profile, name='update-profile'),
+
+    path('resend-email/', views.resend_confirmation_email, name='resend-email')
 ]

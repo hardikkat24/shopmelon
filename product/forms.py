@@ -39,3 +39,4 @@ class ProductFilterForm(forms.Form):
     price_gt = forms.DecimalField(label = 'Price from: ', required=False)
     price_lt = forms.DecimalField(label = 'Price to: ', required=False)
 
+

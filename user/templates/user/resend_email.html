@@ -3,19 +3,18 @@
 
 
 {% block title %}
-Login
+Resend Email
 {% endblock %}
 
 {% block content %}
 
-<h1>Log In</h1>
+<h1>Resend Verification Email</h1>
 
 <form method="POST">
     {% csrf_token %}
     {{ form | crispy }}
-    <button type = "submit" class = "btn btn-primary">Log In</button>
+    <button type = "submit" class = "btn btn-primary">Send</button>
 </form>
-<a class = "btn btn-primary mt-2" href = "{% url 'resend-email' %}">Resend Verification Mail</a>
 
 
 {% endblock %}

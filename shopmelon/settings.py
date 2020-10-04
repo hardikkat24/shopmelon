@@ -153,3 +153,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
+# If email gives an error, make sure to allow less secure apps to send emails
+# For this, use the following link:
+# https://www.google.com/settings/security/lesssecureapps
