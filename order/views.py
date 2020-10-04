@@ -74,7 +74,6 @@ def cart(request):
 
 
 @csrf_exempt
-@login_required
 def ajax_delete_from_cart(request):
     user = request.user
 
@@ -87,10 +86,15 @@ def ajax_delete_from_cart(request):
     except:
         return JsonResponse({'message': 'No such item in cart.', 'type': 'info'})
 
-    if not order_item.order.customer == user.customer:
-        return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
-
     order = order_item.order
+    if user.is_authenticated:
+        if not order_item.order.customer == user.customer:
+            return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+    else:
+        if not(order.customer == None and order.pk == int(request.COOKIES.get('cart'))):
+            return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+
+
     order_item.delete()
 
     amount, quantity = order.get_total_amount_and_quantity()
