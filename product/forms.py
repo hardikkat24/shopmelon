@@ -29,8 +29,8 @@ VariantFormset = modelformset_factory(
 
 VariantFormsetUpdate = modelformset_factory(
     Variant,
-    fields=('type', 'name', 'quantity_available', 'image', 'id'),
-    extra = 0,
+    fields=('type', 'name', 'quantity_available', 'image'),
+    extra = 1,
 )
 
 class ProductFilterForm(forms.Form):

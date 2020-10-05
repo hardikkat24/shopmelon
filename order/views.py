@@ -101,4 +101,3 @@ def ajax_delete_from_cart(request):
 
     amount, quantity = order.get_total_amount_and_quantity()
     return JsonResponse({'message': 'Item successfully removed from cart', 'type': 'success', 'change': True, 'quantity':quantity, 'amount': amount})
-

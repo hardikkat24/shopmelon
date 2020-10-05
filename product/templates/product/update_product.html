@@ -7,16 +7,38 @@ Update Product
 
 {% block content %}
 <h1>Update Product</h1>
+<a href = "{% url 'tags' product.pk %}"class = "btn btn-primary">Manage Tags</a>
 <form method="POST" enctype="multipart/form-data" class = "formset">
     {% csrf_token %}
     {{ form | crispy }}
-     <hr>
+
+    <table class="table">
+        <tr>
+            <td>Type</td>
+            <td>Name</td>
+            <td>Quantity Available</td>
+            <td>Remove</td>
+        </tr>
+        {% for variant in variants %}
+        <tr>
+            <td>{{ variant.get_type_display }}</td>
+            <td>{{ variant.name }}</td>
+            <td>{{ variant.quantity_available }}</td>
+            <td>
+                <button class = "btn btn-danger btn-sm text-white delete-variant-existing" data-id="{{ variant.id }}">
+                    &times;
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <hr>
     {{ formset.management_form }}
     {% for variant_form in formset %}
         <div class = "form-row">
             {{ variant_form | crispy }}
             <div class="right">
-                <button class = "btn btn-danger btn-sm text-white delete-variant">
+                <button class = "btn btn-danger btn-sm text-white delete-variant-new">
                     &times;
                 </button>
             </div>
@@ -26,7 +48,7 @@ Update Product
     <button class = "btn btn-primary add-form-row">Add Variant</button>
     <hr>
     <br>
-    <button type = "submit" class = "btn btn-primary">Create</button>
+    <button type = "submit" class = "btn btn-primary">Update</button>
 </form>
 {% endblock %}
 
@@ -62,25 +84,6 @@ Update Product
         return false
     })
 
-    function reIndex(){
-        formrows = $('.form-row')
-        formrows.each(function (total){
-            this.find(':input:not([type=button]):not([type=submit]):not([type=reset]):not(button)').each(function() {
-
-                var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
-                var id = 'id_' + name;
-                $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
-            });
-            this.find('label').each(function() {
-                var forValue = $(this).attr('for');
-                if (forValue) {
-                  forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
-                  $(this).attr({'for': forValue});
-                }
-            });
-        })
-    }
-
     checkbox = $('#id_has_variants')
     if(checkbox.prop('checked')){
             $('.add-form-row').show()
@@ -98,19 +101,27 @@ Update Product
         }
     })
 
-    $(document).on('click', '.delete-variant', function (e){
+    $(document).on('click', '.delete-variant-new', function (e){
         e.preventDefault()
         row = e.target.parentElement.parentElement
         row = $(row)
-        id = row.children('input').val()
         x = $('#id_' + 'form' + '-TOTAL_FORMS').val();
         x--;
         $('#id_' + 'form' + '-TOTAL_FORMS').val(x);
-        if(id == ''){
-            row.remove()
-            reIndex()
-            return
-        }
+
+        row.remove()
+    })
+
+
+
+    $(document).on('click', '.delete-variant-existing', function (e){
+        e.preventDefault()
+        btn = e.target
+        btn = $(btn)
+        row = e.target.parentElement.parentElement
+        row = $(row)
+
+        id = btn.attr('data-id')
         $.ajax({
             type: 'POST',
             url: '/product/delete-variant/',
@@ -119,11 +130,7 @@ Update Product
             },
             dataType: 'json',
             success: function (data){
-                t = $('#id_' + 'form' + '-INITIAL_FORMS').val();
-                t--;
-                $('#id_' + 'form' + '-INITIAL_FORMS').val(t);
                 row.remove()
-                reIndex()
             }
         })
     })

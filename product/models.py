@@ -72,6 +72,10 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
+        if self.variant_set.count() > 1:
+            self.has_variants = True
+            super().save(*args, **kwargs)
+
         img = Image.open(self.image.path)
 
         if img.height > 800 or img.width > 800:

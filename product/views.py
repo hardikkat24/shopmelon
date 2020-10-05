@@ -62,6 +62,7 @@ def update_product(request, pk):
     user = request.user
     try:
         product = Product.objects.get(pk=pk)
+        variants = product.variant_set.all()
     except:
         return HttpResponseNotFound('Page not found')
     if not (hasattr(user, 'seller') and product.seller == user.seller):
@@ -70,8 +71,9 @@ def update_product(request, pk):
     if request.method == 'POST':
         form = ProductCreationForm(request.POST, request.FILES, instance = product)
         formset = VariantFormsetUpdate(request.POST, request.FILES)
-
+        print(1)
         if formset.is_valid() and form.is_valid():
+            print(2)
             # tags = form.cleaned_data['tag_s']
             # print(tags)
 
@@ -85,22 +87,29 @@ def update_product(request, pk):
                 for variant_form in formset:
                     variant = variant_form.save(commit=False)
                     variant.product = product
-                    variant.save()
+                    try:
+                        variant.save()
+                    except:
+                        pass
 
             else:
                 variant = formset[0].save(commit=False)
                 variant.product = product
                 variant.save()
+                product_new.save()
 
-            return redirect('home')
+            return redirect('product-description', product.pk)
     else:
         form = ProductCreationForm(instance=product)
-        qs = product.variant_set.all()
+        qs = Variant.objects.none()
         formset = VariantFormsetUpdate(queryset=qs)
 
+    print(variants)
     context = {
+        'product': product,
         'form': form,
         'formset': formset,
+        'variants': variants,
     }
 
     return render(request, 'product/update_product.html', context)
