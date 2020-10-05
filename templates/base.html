@@ -25,6 +25,13 @@
         <li class="nav-item">
             <a href = "{% url 'manage-products' %}" class = "nav-link">Manage Products</a>
         </li>
+        {% else %}
+        <li class="nav-item">
+            <a href = "{% url 'search' %}" class = "nav-link">Search Products</a>
+        </li>
+        <li class="nav-item">
+            <a href = "{% url 'cart' %}" class = "nav-link">Cart</a>
+        </li>
         {% endif %}
     </ul>
     </nav>
@@ -35,6 +42,12 @@
     <ul class="navbar-nav">
         <li class="nav-item">
             <a href = "{% url 'login' %}" class = "nav-link">Log In</a>
+        </li>
+        <li class="nav-item">
+            <a href = "{% url 'search' %}" class = "nav-link">Search Products</a>
+        </li>
+        <li class="nav-item">
+            <a href = "{% url 'cart' %}" class = "nav-link">Cart</a>
         </li>
     </ul>
     </nav>
@@ -76,5 +89,5 @@
 		    return null;
 		}
 
-0120.3    </script>
+ </script>
 </body>
