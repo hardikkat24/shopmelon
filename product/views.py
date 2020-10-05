@@ -242,7 +242,8 @@ def tags(request, pk):
             tags = [x.strip() for x in form.cleaned_data['tags'].split(',')]
             objList = []
             for tag in tags:
-                objList.append(Tag.objects.get_or_create(name=tag.lower())[0])
+                if tag != '':
+                    objList.append(Tag.objects.get_or_create(name=tag.lower())[0])
             product.tags.add(*objList)
     else:
         form = TagCreationForm()
@@ -260,15 +261,13 @@ def tags(request, pk):
 
 @csrf_exempt
 def ajax_delete_tags(request):
-    tags = request.POST.get('tags', None)
+    tag = request.POST.get('tag', None)
     product_id = request.POST.get('product_id', None)
-    tags = json.loads(tags)
 
-    list = [int(x) for x in tags]
-    print(list)
 
-    tags_to_be_removed = Tag.objects.filter(pk__in=list)
+
+    tag_to_be_removed = Tag.objects.get(pk=int(tag))
     product = Product.objects.get(pk=product_id)
 
-    product.tags.remove(*tags_to_be_removed)
+    product.tags.remove(tag_to_be_removed)
     return JsonResponse({'message': 'yes'})
