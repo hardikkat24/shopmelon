@@ -93,9 +93,13 @@ def update_product(request, pk):
                         pass
 
             else:
-                variant = formset[0].save(commit=False)
-                variant.product = product
-                variant.save()
+                try:
+                    variant = formset[0].save(commit=False)
+                    variant.product = product
+                    variant.save()
+                except:
+                    pass
+
                 product_new.save()
 
             return redirect('product-description', product.pk)

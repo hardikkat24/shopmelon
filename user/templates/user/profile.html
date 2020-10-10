@@ -17,8 +17,8 @@ Profile
 {% if is_seller %}
     <div>Business Name: {{ seller.business_name }}</div>
     <div>Phone: {{ seller.phone }}</div>
-    <div>Customer Contact Phone: {{ seller.customer_contact_phone }}</div>
-    <div>Customer Contact Email: {{ seller.customer_contact_email }}</div>
+    <div>Business Contact Phone: {{ seller.business_contact_phone }}</div>
+    <div>Business Contact Email: {{ seller.business_contact_email }}</div>
     <div>Aadhar Number: {{ seller.aadhar_no }}</div>
     <div>PAN Number: {{ seller.pan_no }}</div>
     <div>Verified: {% if seller.is_verified %}Complete{% else %}Not Verified{% endif %}</div>

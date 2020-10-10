@@ -20,10 +20,17 @@ class CustomerCreationForm(forms.ModelForm):
         exclude = ('is_phone_verified', 'user')
 
 
-class SellerCreationForm(forms.ModelForm):
+class SellerCreationForm1(forms.ModelForm):
     class Meta:
         model = Seller
-        exclude = ('is_verified', 'user')
+        fields = ('business_name', 'phone',)
+
+
+class SellerCreationForm2(forms.ModelForm):
+    class Meta:
+        model = Seller
+        exclude = ('user', 'is_verified',)
+
 
 
 class EmailResendForm(forms.Form):

@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 
-from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm, CustomUserUpdateForm, EmailResendForm
+from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm1, SellerCreationForm2, CustomUserUpdateForm, EmailResendForm
 from verification.verification_utils import send_cofirmation_mail
 from user.models import CustomUser
 from order.models import Order
@@ -60,17 +60,17 @@ def seller_signup(request):
     """
     if request.method == 'POST':
         user_form = CustomUserCreationForm(request.POST)
-        seller_form = SellerCreationForm(request.POST)
+        seller_form = SellerCreationForm1(request.POST)
         if user_form.is_valid() and seller_form.is_valid():
             user = user_form.save()
             seller = seller_form.save(commit=False)
             seller.user = user
             seller.save()
-            messages.success(request, "Profile created successfully!")
+            messages.success(request, "Profile created successfully. Please check your email for more information.")
             return redirect('login')
     else:
         user_form = CustomUserCreationForm()
-        seller_form = SellerCreationForm()
+        seller_form = SellerCreationForm1()
 
     context = {
         'user_form': user_form,
@@ -127,7 +127,7 @@ def update_profile(request):
             form2 = CustomerCreationForm(request.POST, request.FILES, instance=customer)
         elif hasattr(user, 'seller'):
             seller = user.seller
-            form2 = SellerCreationForm(request.POST, request.FILES, instance=seller)
+            form2 = SellerCreationForm2(request.POST, request.FILES, instance=seller)
         else:
             is_customer_or_seller = False
             form2 = None
@@ -148,7 +148,7 @@ def update_profile(request):
             form2 = CustomerCreationForm(instance=customer)
         elif hasattr(user, 'seller'):
             seller = user.seller
-            form2 = SellerCreationForm(instance=seller)
+            form2 = SellerCreationForm2(instance=seller)
         else:
             is_customer_or_seller = False
             form2 = None

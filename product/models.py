@@ -71,6 +71,13 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        tags = [x.strip() for x in self.name.split()]
+        objList = []
+        for tag in tags:
+            if tag != '':
+                objList.append(Tag.objects.get_or_create(name=tag.lower())[0])
+        self.tags.add(*objList)
+        super().save(*args, **kwargs)
 
         if self.variant_set.count() > 1:
             self.has_variants = True

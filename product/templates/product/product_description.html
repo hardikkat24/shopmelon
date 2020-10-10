@@ -33,27 +33,47 @@
 <br>
 <br>
 <table>
-    {% for variant in variants %}
-    {% if variant.is_available %}
-    <tr class="option">
-        <td>
-            <input type="radio" autocomplete="off" name="variant" value="{{ variant.pk }}" class = "variant-cbox"/>
-        </td>
-        <td>
-            {{ variant.get_type_display }}: {{ variant.name }}
-        </td>
-        <td>
-            <img src = "{{ variant.image_url }}">
-        </td>
-    </tr>
+    {% if product.has_variants %}
+        {% for variant in variants %}
+        {% if variant.is_available %}
+        <tr class="option">
+            <td>
+                <input type="radio" autocomplete="off" name="variant" value="{{ variant.pk }}" class = "variant-cbox"/>
+            </td>
+            <td>
+                {{ variant.get_type_display }}: {{ variant.name }}
+            </td>
+            <td>
+                <img src = "{{ variant.image_url }}">
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    {% else %}
+        {% for variant in variants %}
+        {% if variant.is_available %}
+        <tr class="option">
+            <td>
+                <input type="radio" autocomplete="off" name="variant" value="{{ variant.pk }}" class = "variant-cbox" checked/>
+            </td>
+            <td>
+                {{ variant.get_type_display }}: {{ variant.name }}
+            </td>
+            <td>
+                <img src = "{{ variant.image_url }}">
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
     {% endif %}
-    {% endfor %}
 </table>
+{% if not user.seller %}
 <div class="form-group row">
     <input type="number" name="quantity" class="form-control col-1" id="quantity">
     <button class = "btn btn-primary" id = "add-to-cart">Add to Cart</button>
 
 </div>
+{% endif %}
 {% endblock %}
 
 {% block script %}

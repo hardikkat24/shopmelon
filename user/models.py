@@ -57,11 +57,11 @@ class Seller(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     business_name = models.CharField(max_length=200, null=False, blank=False)
     phone = models.CharField(max_length=10, null=False, blank=False)
-    customer_contact_phone = models.CharField(max_length=10, null=True, blank=True)
-    customer_contact_email = models.EmailField(max_length=255, null=True, blank=True)
+    business_contact_phone = models.CharField(max_length=10, null=True, blank=True)
+    business_contact_email = models.EmailField(max_length=255, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
-    aadhar_no = models.CharField(max_length=12, null=False, blank=False)
-    pan_no = models.CharField(max_length=10, null=False, blank=False)
+    aadhar_no = models.CharField(max_length=12, null=True, blank=True)
+    pan_no = models.CharField(max_length=10, null=True, blank=True)
 
     def __str__(self):
         return str(self.business_name) + ": " + str(self.user)

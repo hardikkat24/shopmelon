@@ -15,7 +15,7 @@ Login
     {{ form | crispy }}
     <button type = "submit" class = "btn btn-primary">Log In</button>
 </form>
-<a class = "btn btn-primary mt-2" href = "{% url 'resend-email' %}">Resend Verification Mail</a>
+Haven't got registration mail yet? <a class = "mt-2" href = "{% url 'resend-email' %}">Resend Verification Mail</a>
 
 
 {% endblock %}

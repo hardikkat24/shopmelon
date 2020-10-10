@@ -16,3 +16,60 @@ Signup
     <button type = "submit" class = "btn btn-primary">Sign Up</button>
 </form>
 {% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    var phone = $("#div_id_business_contact_phone")
+    var email = $("#div_id_business_contact_email")
+    var phone_label = $("<label>").text('  Keep it same as your phone number')
+    var email_label = $("<label>").text('  Keep it same as your email')
+
+    var phone_checkbox = $(document.createElement('input')).attr({
+        id:    'phonecb',
+       name:  'phonecb',
+       value: 'phonecb',
+       type:  'checkbox'
+    })
+
+    var email_checkbox = $(document.createElement('input')).attr({
+        id:    'emailcb',
+       name:  'emailcb',
+       value: 'emailcb',
+       type:  'checkbox'
+    })
+
+    phone_label.prepend(phone_checkbox)
+    phone.append(phone_label)
+
+    email_label.prepend(email_checkbox)
+    email.append(email_label)
+
+    phone_already_tf = $('#id_phone')
+    email_already_tf = $('#id_email')
+
+    phone_tf = $('#id_business_contact_phone')
+    email_tf = $('#id_business_contact_email')
+
+    $(document).on('click', '#phonecb', function(e){
+        if($(this).prop('checked')){
+            phone_tf.val(phone_already_tf.val())
+            phone_tf.prop('readonly', true)
+        }
+        else{
+            phone_tf.val('')
+            phone_tf.prop('readonly', false)
+        }
+    })
+
+    $(document).on('click', '#emailcb', function(e){
+        if($(this).prop('checked')){
+            email_tf.val(email_already_tf.val())
+            email_tf.prop('readonly', true)
+        }
+        else{
+            email_tf.val('')
+            email_tf.prop('readonly', false)
+        }
+    })
+</script>
+{% endblock %}
