@@ -18,5 +18,7 @@ urlpatterns = [
     path('customer-order/<pk>/', views.customer_order_detail, name='customer-order'),
 
     # path('invoice/<pk>/', views.invoice, name='invoice'),
-    path('ajax-quantity-cart/', views.ajax_quantity_cart, name='ajax-quantity-cart')
+    path('ajax-quantity-cart/', views.ajax_quantity_cart, name='ajax-quantity-cart'),
+
+    path('seller-dashboard/', views.seller_dashboard, name='seller-dashboard'),
 ]

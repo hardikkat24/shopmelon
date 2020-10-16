@@ -25,6 +25,7 @@ Order {{order.id}}
                 <tr>
                     <td>Variant</td>
                     <td>Quantity</td>
+                    <td>Amount</td>
                     <td>Status</td>
                 </tr>
             </thead>
@@ -32,10 +33,16 @@ Order {{order.id}}
             <tr>
                 <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
                 <td>{{ order_item.quantity }}</td>
+                <td>{{ order_item.total_amount }}</td>
                 <td class = 'status'>{{ order_item.status.1 }}</td>
             </tr>
             {% endfor %}
         </table>
+    </div>
+    <div>
+        <b>Total Amount: </b>{{ total_amount }}<br>
+        <b>Commission: </b>{{ commission }}%<br>
+        <b>You Get: </b>{{ you_get }}<br>
     </div>
 
     <button class="btn btn-danger not-shipped">Not shipped</button>

@@ -49,6 +49,7 @@ Update Product
     <hr>
     <br>
     <button type = "submit" class = "btn btn-primary">Update</button>
+    <a type = "submit" class = "btn btn-danger" href="{% url 'delete-product' product.pk %}">Delete</a>
 </form>
 {% endblock %}
 

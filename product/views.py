@@ -119,6 +119,21 @@ def update_product(request, pk):
     return render(request, 'product/update_product.html', context)
 
 
+@login_required
+def delete_product(request, pk):
+    user = request.user
+    try:
+        product = Product.objects.get(pk=pk)
+    except:
+        return HttpResponseNotFound('Page not found')
+    if not (hasattr(user, 'seller') and product.seller == user.seller):
+        return HttpResponseNotAllowed('You are not allowed to view this page.')
+
+    product.delete()
+    messages.success(request, 'Product deleted successfully!')
+    return redirect('manage-products')
+
+
 def search(request):
     form = ProductFilterForm(request.GET)
 

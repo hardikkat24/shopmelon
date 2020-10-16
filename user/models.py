@@ -62,9 +62,18 @@ class Seller(models.Model):
     is_verified = models.BooleanField(default=False)
     aadhar_no = models.CharField(max_length=12, null=True, blank=True)
     pan_no = models.CharField(max_length=10, null=True, blank=True)
+    amount_for_delivered = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.business_name) + ": " + str(self.user)
+
+    def delivered(self, amount):
+        self.amount_for_delivered = self.amount_for_delivered + amount
+        self.save()
+
+    def undelivered(self, amount):
+        self.amount_for_delivered = self.amount_for_delivered - amount
+        self.save()
 
 
 class Address(models.Model):

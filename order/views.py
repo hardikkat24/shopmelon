@@ -6,7 +6,7 @@ from django.contrib import messages
 import os
 import razorpay
 from datetime import datetime
-
+from django.conf import settings
 
 from user.models import Address
 from product.models import Variant
@@ -271,6 +271,18 @@ def pay_with_cod(request, pk):
     messages.success(request, 'Order Successfully Placed')
     return redirect('home')
 
+@login_required
+def seller_dashboard(request):
+    user = request.user
+    total_amt = user.seller.amount_for_delivered
+    context = {
+        'seller': user.seller,
+        'total_amount': total_amt,
+        'commission': settings.COMMISSION_RATE,
+        'you_get': int(total_amt - total_amt * settings.COMMISSION_RATE / 100)
+    }
+
+    return render(request, 'order/seller_dashboard.html', context)
 
 @login_required
 def seller_orders(request):
@@ -279,11 +291,11 @@ def seller_orders(request):
     if not hasattr(user, 'seller'):
         return HttpResponseForbidden('You are not allowed to view this page.')
 
-    unshipped_orders = OrderItem.objects.values('order', 'order__date_ordered', 'order__date_shipped', 'order__is_shipped').filter(variant__product__seller=user.seller, order__is_order_placed = True, order__is_shipped=False).distinct().order_by('-order__date_ordered')
-    shipped_orders = OrderItem.objects.values('order', 'order__date_ordered', 'order__date_shipped', 'order__is_shipped').filter(variant__product__seller=user.seller, order__is_order_placed = True, order__is_shipped=True).distinct().order_by('-order__date_ordered')
+    orders = OrderItem.objects.values('order', 'order__date_ordered', 'order__date_shipped').filter(variant__product__seller=user.seller, order__is_order_placed = True,).distinct().order_by('-order__date_ordered')
+    # shipped_orders = OrderItem.objects.values('order', 'order__date_ordered', 'order__date_shipped', 'order__is_shipped').filter(variant__product__seller=user.seller, order__is_order_placed = True, order__is_shipped=True).distinct().order_by('-order__date_ordered')
     context = {
-        'unshipped_orders': unshipped_orders,
-        'shipped_orders': shipped_orders
+        'orders': orders,
+        # 'shipped_orders': shipped_orders
     }
 
     return render(request, 'order/seller_orders.html', context)
@@ -301,10 +313,17 @@ def seller_order_detail(request, pk):
 
     order_items = order.orderitem_set.filter(variant__product__seller=user.seller)
 
+    total_amt = 0
+    for item in order_items:
+        total_amt = total_amt + item.total_amount
+
     context = {
         'order': order,
         'order_items': order_items,
         'address': order.address,
+        'total_amount': total_amt,
+        'commission': settings.COMMISSION_RATE,
+        'you_get': int(total_amt - total_amt*settings.COMMISSION_RATE/100)
     }
 
     return render(request, 'order/seller_order_detail.html', context)
@@ -320,14 +339,23 @@ def ajax_sent_for_delivery(request):
     order = Order.objects.get(pk=order_id)
 
     order_items = order.orderitem_set.filter(variant__product__seller=user.seller)
+    total_amt = 0
+    for item in order_items:
+        total_amt = total_amt + item.total_amount
+
     if for_shipping == 'true':
+        if order_items[0].is_delivered:
+            user.seller.undelivered(total_amt)
         if unsent == 'true':
             order_items.update(is_shipped=False, is_delivered=False)
         else:
             order_items.update(is_shipped=True, is_delivered=False)
 
     else:
+        if not order_items[0].is_delivered:
+            user.seller.delivered(total_amt)
         order_items.update(is_shipped=True, is_delivered=True)
+
 
     return JsonResponse({'message': 'Status changed successfully', 'type': 'success'})
 

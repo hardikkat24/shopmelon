@@ -21,7 +21,10 @@ urlpatterns = [
     path('add-product/', views.add_product, name='add-product'),
     path('tags/<pk>/', views.tags, name='tags'),
     path('delete-tags/', views.ajax_delete_tags, name='ajax-delete-tags'),
+
     path('update-product/<pk>/', views.update_product, name='update-product'),
+    path('delete-product/<pk>/', views.delete_product, name='delete-product'),
+
     path('delete-variant/', views.ajax_delete_variant, name='delete-variant'),
     path('product-description/<pk>/', views.product_description, name='product-description'),
 

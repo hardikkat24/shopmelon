@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<div>
+    <div>
+        <b>Total Amount: </b>{{ total_amount }}<br>
+        <b>Commission: </b>{{ commission }}%<br>
+        <b>You Get: </b>{{ you_get }}<br>
+    </div>
+    <a class="btn btn-primary shipped" href = "{% url 'manage-products' %}">Manage Products</a>
+    <br>
+    <br>
+    <a class="btn btn-primary delivered" href = "{% url 'seller-orders' %}">Manage Orders</a>
+</div>
+{% endblock %}

@@ -141,6 +141,8 @@ LOGIN_REDIRECT_URL = 'profile'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+COMMISSION_RATE = 10 #percentage
+
 from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
