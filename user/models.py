@@ -69,11 +69,11 @@ class Seller(models.Model):
 
 class Address(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    line1 = models.CharField(max_length=255, null=False, blank=False)
-    line2 = models.CharField(max_length=255, null=False, blank=False)
-    city = models.CharField(max_length=100, null=False, blank=False)
-    state = models.CharField(max_length=100, null=False, blank=False)
-    pincode = models.CharField(max_length=6, null=False, blank=False)
+    line1 = models.CharField(max_length=255, null=False, blank=True)
+    line2 = models.CharField(max_length=255, null=False, blank=True)
+    city = models.CharField(max_length=100, null=False, blank=True)
+    state = models.CharField(max_length=100, null=False, blank=True)
+    pincode = models.CharField(max_length=6, null=False, blank=True)
 
     def __str__(self):
-        return str(self.user) + self.pk
+        return str(self.user) + str(self.pk)

@@ -117,6 +117,9 @@ class Variant(models.Model):
     def can_order(self, quantity):
         return self.quantity_available >= quantity
 
+    def order(self, quantity):
+        self.quantity_available = self.quantity_available - quantity
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         try:

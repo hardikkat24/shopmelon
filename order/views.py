@@ -1,11 +1,21 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
+from django.contrib import messages
+import os
+import razorpay
+from datetime import datetime
 
+from user.models import Address
 from product.models import Variant
 from order.models import Order, OrderItem
+from .forms import AddressForm
+from.utils import checkOrder, finaliseOrder
 
+RP_KEY_ID = os.environ.get('RP_KEY_ID')
+RP_KEY_SECRET = os.environ.get('RP_KEY_SECRET')
+client = razorpay.Client(auth=(RP_KEY_ID, RP_KEY_SECRET))
 
 @csrf_exempt
 def ajax_add_to_cart(request):
@@ -72,6 +82,7 @@ def cart(request):
             'cart_is_empty': True,
         }
 
+
     return render(request, 'order/cart.html', context)
 
 
@@ -101,3 +112,256 @@ def ajax_delete_from_cart(request):
 
     amount, quantity = order.get_total_amount_and_quantity()
     return JsonResponse({'message': 'Item successfully removed from cart', 'type': 'success', 'change': True, 'quantity':quantity, 'amount': amount})
+
+
+@login_required
+def place_order(request):
+    user = request.user
+    address_existing = user.address_set.all()
+    form = AddressForm()
+
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address_id = request.POST.get('cb', None)
+            create_new_address = (address_id=='0')
+
+            if create_new_address:
+                print('save')
+                address = form.save(commit=False)
+                if address.line1=='' or address.city=='' or address.state=='' or address.pincode=='':
+                    form.add_error(None, 'Enter valid address')
+                else:
+                    address.user = user
+                    address.save()
+                    address_id = address.pk
+                    return redirect('create-order', address_id)
+
+            else:
+                return redirect('create-order', address_id)
+
+    context = {
+        'form': form,
+        'addresses': address_existing,
+    }
+    return render(request, 'order/place_order.html', context)
+
+
+@login_required
+def create_order(request, pk):
+    user = request.user
+
+    try:
+        order = Order.objects.get(customer=user.customer, is_order_placed=False)
+    except:
+        messages.info(request, 'No item in cart.')
+        redirect('cart')
+
+    try:
+        address = Address.objects.get(pk=pk)
+    except:
+        messages.info(request, 'No such address.')
+        redirect('cart')
+
+    data_order_related = checkOrder(order)
+    if data_order_related['valid'] == False:
+        for key in data_order_related:
+            if key != 'valid':
+                dic = data_order_related[key]
+                print(dic)
+                messages.info(request, dic['product'].name + '(' + dic['variant'].name + '): Only' + str(dic['quantity_available']) + 'pieces left.')
+        return redirect('cart')
+
+    if request.method == 'POST':
+        order_currency = 'INR'
+        order_receipt = 'order_'+str(order.pk)
+        order_amount, _ = order.get_total_amount_and_quantity()
+        order_amount = order_amount*100
+
+        response = client.order.create(dict(amount=order_amount, currency=order_currency, receipt=order_receipt, payment_capture='0'))
+        order_id = response['id']
+        order_status = response['status']
+
+        if order_status == 'created':
+            print('CREATED')
+            context = {
+                'address': address,
+                'order_id': order_id,
+                'order': order.pk,
+                'amount': order_amount,
+                'rzp_key': RP_KEY_ID,
+                'name': user.first_name + ' ' + user.last_name,
+                'email': user.email,
+                'phone': user.customer.phone,
+            }
+            return render(request, 'order/confirm_order.html', context)
+
+
+    return render(request, 'order/create_order.html',{
+        'address': address,
+        'order': order,
+        'quantity': order.get_total_amount_and_quantity()[1],
+        'amount': order.get_total_amount_and_quantity()[0],
+        'order_items': order.orderitem_set.all()
+    })
+
+
+@login_required
+def order_summary(request, pk):
+    user = request.user
+    data = request.POST
+
+    try:
+        order = Order.objects.get(customer=user.customer, is_order_placed=False)
+    except:
+        messages.info(request, 'No item in cart.')
+        redirect('cart')
+
+    try:
+        address = Address.objects.get(pk=pk)
+    except:
+        messages.info(request, 'No such address.')
+        redirect('cart')
+
+
+    params_dict = {
+        'razorpay_payment_id' : data['razorpay_payment_id'],
+        'razorpay_order_id' : data['razorpay_order_id'],
+        'razorpay_signature' : data['razorpay_signature']
+    }
+
+    # Verifying order status
+    try:
+        status = client.utility.verify_payment_signature(params_dict)
+        order.is_order_placed = True
+        order.is_payment_done = True
+        order.address = address
+        order.date_ordered = datetime.now()
+        order.save()
+
+        finaliseOrder(order)
+
+        return render(request, 'order/order_summary.html', {'status': 'Payment Successful'})
+    except:
+        return render(request, 'order/order_summary.html', {'status': 'Payment Faliure!!!'})
+
+
+@login_required
+def pay_with_cod(request, pk):
+    user = request.user
+
+    try:
+        order = Order.objects.get(customer=user.customer, is_order_placed=False)
+    except:
+        messages.info(request, 'No item in cart.')
+        redirect('cart')
+
+    try:
+        address = Address.objects.get(pk=pk)
+    except:
+        messages.info(request, 'No such address.')
+        redirect('cart')
+    order.is_order_placed = True
+    order.address = address
+    order.date_ordered = datetime.now()
+    order.save()
+
+    finaliseOrder(order)
+    messages.success(request, 'Order Successfully Placed')
+    return redirect('home')
+
+
+@login_required
+def seller_orders(request):
+    user = request.user
+
+    if not hasattr(user, 'seller'):
+        return HttpResponseForbidden('You are not allowed to view this page.')
+
+    unshipped_orders = OrderItem.objects.values('order', 'order__date_ordered', 'order__date_shipped', 'order__is_shipped').filter(variant__product__seller=user.seller, order__is_order_placed = True, order__is_shipped=False).distinct().order_by('-order__date_ordered')
+    shipped_orders = OrderItem.objects.values('order', 'order__date_ordered', 'order__date_shipped', 'order__is_shipped').filter(variant__product__seller=user.seller, order__is_order_placed = True, order__is_shipped=True).distinct().order_by('-order__date_ordered')
+    context = {
+        'unshipped_orders': unshipped_orders,
+        'shipped_orders': shipped_orders
+    }
+
+    return render(request, 'order/seller_orders.html', context)
+
+
+@login_required
+def seller_order_detail(request, pk):
+    user = request.user
+
+    try:
+        order = Order.objects.get(pk=pk)
+    except:
+        messages.info(request, 'No such order')
+        return redirect('seller-orders')
+
+    order_items = order.orderitem_set.filter(variant__product__seller=user.seller)
+
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'address': order.address,
+    }
+
+    return render(request, 'order/seller_order_detail.html', context)
+
+
+@csrf_exempt
+def ajax_sent_for_delivery(request):
+    user = request.user
+
+    order_id = request.POST.get('order_id')
+    unsent = request.POST.get('unsent')
+    for_shipping = request.POST.get('for_shipping')
+    order = Order.objects.get(pk=order_id)
+
+    order_items = order.orderitem_set.filter(variant__product__seller=user.seller)
+    if for_shipping == 'true':
+        if unsent == 'true':
+            order_items.update(is_shipped=False, is_delivered=False)
+        else:
+            order_items.update(is_shipped=True, is_delivered=False)
+
+    else:
+        order_items.update(is_shipped=True, is_delivered=True)
+
+    return JsonResponse({'message': 'Status changed successfully', 'type': 'success'})
+
+
+@login_required
+def customer_orders(request):
+    user = request.user
+
+    if not hasattr(user, 'customer'):
+        return HttpResponseForbidden('You are not allowed to view this page.')
+
+    orders = Order.objects.filter(customer=user.customer).order_by('-date_ordered')
+    print(orders)
+    context = {
+        'orders': orders,
+    }
+
+    return render(request, 'order/customer_orders.html', context)
+
+
+@login_required
+def customer_order_detail(request, pk):
+    user = request.user
+
+    try:
+        order = Order.objects.get(pk=pk)
+    except:
+        messages.info(request, 'No such order')
+        return redirect('customer-orders')
+
+    context = {
+        'order': order,
+        'address': order.address,
+        'order_items': order.orderitem_set.all(),
+    }
+
+    return render(request, 'order/customer_order_detail.html', context)
+

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{{ seller.business_name }}
+{% endblock %}
+
+{% block content %}
+<h1>{{ seller.business_name }}</h1>
+<table class="table">
+    <tr>
+        <td>Name</td>
+        <td>{{ seller.user.first_name }} {{ seller.user.last_name }}</td>
+    </tr>
+    <tr>
+        <td>Phone</td>
+        <td>{{ seller.phone }}</td>
+    </tr>
+    <tr>
+        <td>Email</td>
+        <td>{{ seller.user.email}}</td>
+    </tr>
+</table>
+<br>
+<br>
+
+<form method="POST" class="form-group row">
+    {% csrf_token %}
+    <button class = "btn btn-primary" id = "add-to-cart">Verify</button>
+</form>
+
+{% endblock %}

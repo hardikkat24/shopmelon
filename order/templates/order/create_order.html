@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Order Details
+{% endblock %}
+
+{% block content %}
+<h1>Order Details</h1>
+<div>
+    <div>
+        <p>{{ address.line1 }}</p>
+        <p>{{ address.line2 }}</p>
+        <p>{{ address.city }}</p>
+        <p>{{ address.state }}</p>
+        <p>{{ address.pincode }}</p>
+    </div>
+    <div>
+        <b>Total items: <span id="quantity">{{ quantity }}</span><br>
+            Total amount: <span id="amount">{{ amount }}</span><br></b>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Image</td>
+                    <td>Name</td>
+                    <td>Quantity</td>
+                    <td>Price</td>
+                </tr>
+            </thead>
+            {% for order_item in order_items %}
+            <tr>
+                <td><img width="200px" src = "{{ order_item.variant.product.image_url }}"></td>
+                <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
+                <td>{{ order_item.quantity }}</td>
+                <td>{{ order_item.total_amount }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type = "submit" class = "btn btn-primary">Proceed to Pay</button>
+    </form>
+
+</div>
+{% endblock %}

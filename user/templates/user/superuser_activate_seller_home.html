@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Activate Sellers
+{% endblock %}
+
+{% block content %}
+<h1>Activate Sellers</h1>
+<div>
+
+{% for seller in sellers %}
+
+    <div class=" row center card p-3">
+        <a href = "{% url 'activate-seller' seller.pk %}">
+            <div class="card-body">
+                <div class="card-title">{{ seller.business_name }}</div>
+            </div>
+        </a>
+    </div>
+
+{% endfor %}
+
+</div>
+{% endblock %}

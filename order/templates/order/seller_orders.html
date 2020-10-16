@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Customer Orders
+{% endblock %}
+
+{% block content %}
+<h1>Seller Orders</h1>
+<div>
+
+    <div>
+        <h2>Unshipped Orders</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Order ID</td>
+                    <td>Date Ordered</td>
+                </tr>
+            </thead>
+            {% for order in unshipped_orders %}
+            <tr>
+                <td><a href = "{% url 'seller-order' order.order %}">{{ order.order }}</a></td>
+                <td>{{ order.order__date_ordered }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div>
+        <h2>Shipped Orders</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Order ID</td>
+                    <td>Date Ordered</td>
+                </tr>
+            </thead>
+            {% for order in shipped_orders %}
+                <tr>
+                    <td><a href = "{% url 'seller-order' order.order %}">{{ order.order }}</a></td>
+                    <td>{{ order.order__date_ordered }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

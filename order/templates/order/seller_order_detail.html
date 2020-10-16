@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Order {{order.id}}
+{% endblock %}
+
+{% block content %}
+<h1>Order {{order.id}}</h1>
+<b>Status: </b>{{ order.status.1 }}
+<div>
+    <div>
+        <h2>Address</h2>
+        <p>{{ address.line1 }}</p>
+        <p>{{ address.line2 }}</p>
+        <p>{{ address.city }}</p>
+        <p>{{ address.state }}</p>
+        <p>{{ address.pincode }}</p>
+    </div>
+
+    <div>
+        <input type="hidden" value="{{ order.id }}" id="order">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Variant</td>
+                    <td>Quantity</td>
+                    <td>Status</td>
+                </tr>
+            </thead>
+            {% for order_item in order_items %}
+            <tr>
+                <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
+                <td>{{ order_item.quantity }}</td>
+                <td class = 'status'>{{ order_item.status.1 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <button class="btn btn-danger not-shipped">Not shipped</button>
+    <br>
+    <br>
+    <button class="btn btn-success shipped">Shipped</button>
+    <br>
+    <br>
+    <button class="btn btn-success delivered">Delivered</button>
+
+</div>
+{% endblock %}
+
+
+{% block script %}
+<script type="text/javascript">
+    order_id = $('#order').val()
+    $(document).on('click', '.shipped', function (e){
+        myurl = '/order/ajax-sent-for-delivery/'
+
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'for_shipping':true,
+                'unsent': false,
+                'order_id': order_id,
+            },
+            dataType: 'json',
+            success: function (data){
+                $('.alert').remove()
+                str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                        data.message +
+                        '</div>'
+                $('nav').after(str)
+                $('.status').text('Shipped')
+            }
+        })
+    })
+
+    $(document).on('click', '.not-shipped', function (e){
+        myurl = '/order/ajax-sent-for-delivery/'
+
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'for_shipping':true,
+                'unsent': true,
+                'order_id': order_id
+            },
+            dataType: 'json',
+            success: function (data){
+                $('.alert').remove()
+                str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                        data.message +
+                        '</div>'
+                $('nav').after(str)
+                $('.status').text('Not Shipped')
+            }
+        })
+    })
+
+    $(document).on('click', '.delivered', function (e){
+        myurl = '/order/ajax-sent-for-delivery/'
+
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'for_shipping':false,
+                'unsent': true,
+                'order_id': order_id
+            },
+            dataType: 'json',
+            success: function (data){
+                $('.alert').remove()
+                str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                        data.message +
+                        '</div>'
+                $('nav').after(str)
+                $('.status').text('Delivered')
+            }
+        })
+    })
+</script>
+{% endblock %}

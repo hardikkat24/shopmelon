@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Order {{order.id}}
+{% endblock %}
+
+{% block content %}
+<h1>Order {{order.id}}</h1>
+<b>Status: </b>{{ order.status.1 }}
+<div>
+    <div>
+        <h2>Address</h2>
+        <p>{{ address.line1 }}</p>
+        <p>{{ address.line2 }}</p>
+        <p>{{ address.city }}</p>
+        <p>{{ address.state }}</p>
+        <p>{{ address.pincode }}</p>
+    </div>
+
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Variant</td>
+                    <td>Quantity</td>
+                    <td>Status</td>
+                </tr>
+            </thead>
+            {% for order_item in order_items %}
+            <tr>
+                <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
+                <td>{{ order_item.quantity }}</td>
+                <td class = 'status'>{{ order_item.status.1 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

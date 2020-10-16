@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Place Order
+{% endblock %}
+
+{% block content %}
+<h1>Please select address</h1>
+<div>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="radio" name = "cb" value="0">
+        {{ form | crispy }}
+        {% for address in addresses %}
+            <hr>
+            <input type="radio" name = "cb" value="{{ address.pk }}">
+            <div>
+                <p>{{ address.line1 }}</p>
+                <p>{{ address.line2 }}</p>
+                <p>{{ address.city }}</p>
+                <p>{{ address.state }}</p>
+                <p>{{ address.pincode }}</p>
+            </div>
+        {% endfor %}
+        <button type = "submit" class = "btn btn-primary">Place Order</button>
+    </form>
+
+</div>
+{% endblock %}

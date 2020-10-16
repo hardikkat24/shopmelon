@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Payment
+{% endblock %}
+
+{% block content %}
+<h1>Payment</h1>
+<div>
+    <a class='btn btn-primary' href="{% url 'pay-with-cod' address.pk %}">COD(Cash on Delivery)</a>
+<form action="{% url 'order-summary' address.pk %}" method="POST">{% csrf_token %}
+
+
+<script    src="https://checkout.razorpay.com/v1/checkout.js"
+       data-key="{{ rzp_key }}"
+       data-amount="{{ amount }}"
+       data-currency="INR"
+       data-order_id="{{ order_id }}"
+       data-buttontext="Pay with Razorpay"
+       data-name="Shopmelon"
+       data-description="Test transaction Shopmelon"
+       data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRpWzPOB8s9WRX7JXZ96x1oPESu-eoN5YUFfDKcebTKFn7piPBS&usqp=CAU"
+       data-prefill.name="{{ name }}"
+       data-prefill.email="{{ email }}"
+       data-prefill.contact="{{ phone }}"
+       data-theme.color="#F37254"></script>
+<input type="hidden" custom="Hidden Element" name="hidden">
+
+
+
+
+</form>
+
+</div>
+{% endblock %}

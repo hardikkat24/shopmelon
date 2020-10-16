@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
+from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 
 from .forms import CustomUserCreationForm, CustomerCreationForm, SellerCreationForm1, SellerCreationForm2, CustomUserUpdateForm, EmailResendForm
 from verification.verification_utils import send_cofirmation_mail
-from user.models import CustomUser
+from .utils import send_activation_confirmation_mail
+from user.models import CustomUser, Seller
 from order.models import Order
 
 def home(request):
@@ -62,7 +64,13 @@ def seller_signup(request):
         user_form = CustomUserCreationForm(request.POST)
         seller_form = SellerCreationForm1(request.POST)
         if user_form.is_valid() and seller_form.is_valid():
-            user = user_form.save()
+            user = user_form.save(commit=False)
+            user.is_active = False
+            user.save()
+
+            current_site = get_current_site(request)
+            send_cofirmation_mail(user, current_site)
+
             seller = seller_form.save(commit=False)
             seller.user = user
             seller.save()
@@ -186,6 +194,45 @@ def resend_confirmation_email(request):
 
     return render(request, 'user/resend_email.html', context)
 
+
+@login_required
+def superuser_activate_seller_home(request):
+    user = request.user
+
+    if not user.is_superuser:
+        return HttpResponseForbidden('You are not allowed to view this page.')
+
+    sellers = Seller.objects.filter(is_verified = False).prefetch_related('user')
+
+    context = {
+        'sellers': sellers,
+    }
+
+    return render(request, 'user/superuser_activate_seller_home.html', context)
+
+
+@login_required
+def superuser_activate_seller(request, pk):
+    user = request.user
+
+    if not user.is_superuser:
+        return HttpResponseForbidden('You are not allowed to view this page.')
+
+    seller = Seller.objects.get(pk=pk)
+    if request.method == 'POST':
+        seller.is_verified = True
+        seller.save()
+
+        current_site = get_current_site(request)
+        send_activation_confirmation_mail(seller.user, current_site)
+
+        messages.success(request, 'Seller verified')
+
+    context = {
+        'seller': seller,
+    }
+
+    return render(request, 'user/superuser_activate_seller.html', context)
 
 
 def basic_home(request):

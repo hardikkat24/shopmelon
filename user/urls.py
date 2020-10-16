@@ -23,5 +23,8 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('update-profile/', views.update_profile, name='update-profile'),
 
-    path('resend-email/', views.resend_confirmation_email, name='resend-email')
+    path('resend-email/', views.resend_confirmation_email, name='resend-email'),
+
+    path('activate-seller-home/', views.superuser_activate_seller_home, name='activate-seller-home'),
+    path('activate-seller/<pk>/', views.superuser_activate_seller, name='activate-seller'),
 ]

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Customer Orders
+{% endblock %}
+
+{% block content %}
+<h1>Customer Orders</h1>
+<div>
+
+    <div>
+        <h2>My Orders</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Date Ordered</td>
+                    <td>Order Amount</td>
+                    <td>Status</td>
+                    <td>Details</td>
+                </tr>
+            </thead>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.date_ordered }}</td>
+                <td>{{ order.get_total_amount_and_quantity.0 }}</td>
+                <td>{{ order.status.1 }}</td>
+                <td><a href = "{% url 'customer-order' order.pk %}">Details</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}
