@@ -18,6 +18,7 @@ class Order(models.Model):
     is_payment_done = models.BooleanField(default=False)
     is_cancelled = models.BooleanField(default=False)
     address = models.ForeignKey(Address, on_delete=models.CASCADE, null=True, blank=True)
+    invoice_url = models.URLField(null=True, blank=True)
 
     def get_total_amount_and_quantity(self):
         quantity = amount = 0
@@ -70,6 +71,13 @@ class OrderItem(models.Model):
         if self.is_shipped:
             return ('S', 'Shipped')
         return ('N', 'Not Shipped')
+
+    def save(self, *args, **kwargs):
+        if self.quantity <= 0:
+            self.delete()
+        else:
+            super().save(*args, **kwargs)
+        return
 
 class Payment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)

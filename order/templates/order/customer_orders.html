@@ -18,6 +18,7 @@ Customer Orders
                     <td>Order Amount</td>
                     <td>Status</td>
                     <td>Details</td>
+                    <td>Invoice</td>
                 </tr>
             </thead>
             {% for order in orders %}
@@ -26,6 +27,7 @@ Customer Orders
                 <td>{{ order.get_total_amount_and_quantity.0 }}</td>
                 <td>{{ order.status.1 }}</td>
                 <td><a href = "{% url 'customer-order' order.pk %}">Details</a></td>
+                <td><a href = "{{ order.invoice_url }}">Invoice</a></td>
             </tr>
             {% endfor %}
         </table>

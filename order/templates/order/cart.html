@@ -30,7 +30,11 @@ Cart
                 <tr>
                     <td><img width="200px" src = "{{ order_item.variant.product.image_url }}"></td>
                     <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
-                    <td>{{ order_item.quantity }}</td>
+                    <td>
+                        <button class = "btn btn-danger btn-sm text-white decrease-qty" data-id="{{ order_item.pk }}">-</button>
+                        <span>{{ order_item.quantity }}</span>
+                        <button class = "btn btn-danger btn-sm text-white increase-qty" data-id="{{ order_item.pk }}">+</button>
+                    </td>
                     <td>{{ order_item.total_amount }}</td>
                     <td><button class = "btn btn-danger btn-sm text-white delete-item" data-id="{{ order_item.pk }}">&times</button></td>
                 </tr>
@@ -68,6 +72,82 @@ Cart
                         data.message +
                         '</div>'
                 $('nav').after(str)
+                $('#quantity').text(data.quantity)
+                $('#amount').text(data.amount)
+            }
+        })
+    })
+
+    $(document).on('click', '.decrease-qty', function (e){
+        var val = $(this).attr('data-id')
+        row = $(this).parent().parent()
+        span = $(this).next()
+        myurl = '/order/ajax-quantity-cart/'
+        console.log(span)
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'order_item_pk': val,
+                'increase': false,
+            },
+            dataType: 'json',
+            success: function (data){
+                console.log(data)
+                if (data.quantity == 0){
+                    location.reload()
+                    return
+                }
+                if (data.item_quantity == 0){
+                    row.remove()
+                }
+                else{
+                    span.text(data.item_quantity)
+                }
+                span.parent().next().text(data.item_price)
+                $('.alert').remove()
+                // str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                //         data.message +
+                //         '</div>'
+                // $('nav').after(str)
+                $('#quantity').text(data.quantity)
+                $('#amount').text(data.amount)
+            }
+        })
+    })
+
+    $(document).on('click', '.increase-qty', function (e){
+        var val = $(this).attr('data-id')
+        row = $(this).parent().parent()
+        span = $(this).prev()
+        myurl = '/order/ajax-quantity-cart/'
+
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'order_item_pk': val,
+                'increase': true,
+            },
+            dataType: 'json',
+            success: function (data){
+                console.log(data)
+                if (data.quantity == 0){
+                    location.reload()
+                    return
+                }
+                if (data.item_quantity == 0){
+                    row.remove()
+                }
+                else{
+                    span.text(data.item_quantity)
+                }
+                span.parent().next().text(data.item_price)
+                $('.alert').remove()
+                // str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                //         data.message +
+                //         '</div>'
+                // $('nav').after(str)
                 $('#quantity').text(data.quantity)
                 $('#amount').text(data.amount)
             }

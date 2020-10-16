@@ -7,6 +7,7 @@ import os
 import razorpay
 from datetime import datetime
 
+
 from user.models import Address
 from product.models import Variant
 from order.models import Order, OrderItem
@@ -239,7 +240,7 @@ def order_summary(request, pk):
         order.date_ordered = datetime.now()
         order.save()
 
-        finaliseOrder(order)
+        finaliseOrder(order, user)
 
         return render(request, 'order/order_summary.html', {'status': 'Payment Successful'})
     except:
@@ -266,7 +267,7 @@ def pay_with_cod(request, pk):
     order.date_ordered = datetime.now()
     order.save()
 
-    finaliseOrder(order)
+    finaliseOrder(order, user)
     messages.success(request, 'Order Successfully Placed')
     return redirect('home')
 
@@ -365,3 +366,63 @@ def customer_order_detail(request, pk):
 
     return render(request, 'order/customer_order_detail.html', context)
 
+
+@login_required
+@csrf_exempt
+def ajax_quantity_cart(request):
+    user = request.user
+
+    order_item_pk = request.POST.get('order_item_pk', 0)
+    increase = request.POST.get('increase')
+    if order_item_pk == '':
+        return JsonResponse({'message': 'Invalid data.', 'type': 'danger'})
+
+    try:
+        order_item = OrderItem.objects.get(pk=order_item_pk)
+    except:
+        return JsonResponse({'message': 'No such item in cart.', 'type': 'info'})
+
+    order = order_item.order
+    if user.is_authenticated:
+        if not order_item.order.customer == user.customer:
+            return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+    else:
+        if not(order.customer == None and order.pk == int(request.COOKIES.get('cart'))):
+            return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+
+    if increase == 'true':
+        order_item.quantity = order_item.quantity + 1
+    else:
+        order_item.quantity = order_item.quantity - 1
+
+    order_item.save()
+    item_quantity = order_item.quantity
+    item_price = order_item.total_amount
+    amount, quantity = order.get_total_amount_and_quantity()
+    return JsonResponse({'message': 'Item successfully removed from cart', 'type': 'success', 'change': True, 'quantity':quantity, 'amount': amount, 'item_quantity': item_quantity, 'item_price': item_price})
+# @login_required
+# def invoice(request, pk):
+#     user = request.user
+#
+#     if not hasattr(user, 'customer'):
+#         return HttpResponseForbidden('You are not allowed to view this page.')
+#
+#     try:
+#         order = Order.objects.get(pk=pk)
+#     except:
+#         messages.info(request, 'No such order')
+#         return redirect('customer-orders')
+#
+#     if not order.customer == user.customer:
+#         return HttpResponseForbidden('You are not allowed to view this page.')
+
+
+
+    # fs = FileSystemStorage(dir)
+    # print(fs.url(filename))
+    # pdf = fs.url(filename)
+    # # with fs.open(filename) as pdf:
+    # #     print(fs.url(filename))
+    # response = HttpResponse(pdf, content_type='application/pdf')
+    # response['Content-Disposition'] = 'attachment; filename="'+ filename +'"'
+    # return response
