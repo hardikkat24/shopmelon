@@ -139,7 +139,7 @@
                     console.log(data)
                     document.cookie ='cart=' + data.cart + ";domain=;path=/;SameSite=Lax;"
                     $('.alert').remove()
-                    str = '<div class="alert alert-'+data.type+' alert-dismissible" role="alert">' +
+                    str = '<div class="alert alert-'+data.type+' alert-dismissible pt-4 mt-5" role="alert">' +
                             data.message +
                             '</div>'
                     $('nav').after(str)

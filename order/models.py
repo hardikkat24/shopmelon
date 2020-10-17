@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from django.conf import settings
 
 from user.models import Customer, Address
 from product.models import Product, Variant
@@ -59,18 +61,63 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(default=1)
     is_shipped = models.BooleanField(default=False)
     is_delivered = models.BooleanField(default=False)
-
+    is_cancelled = models.BooleanField(default=False)
+    date_delivered = models.DateTimeField(null=True, blank=True)
+    is_return_requested = models.BooleanField(default=False)
+    is_return_completed = models.BooleanField(default=False)
     @property
     def total_amount(self):
         return self.quantity * self.variant.product.unit_price
 
     @property
     def status(self):
+        if self.is_return_completed:
+            return ('R', 'Returned')
+        if self.is_return_requested:
+            return ('RR', 'Return Requested')
+        if self.is_cancelled:
+            return ('C', 'Cancelled')
         if self.is_delivered:
             return ('D', 'Delivered')
         if self.is_shipped:
             return ('S', 'Shipped')
         return ('N', 'Not Shipped')
+
+    @property
+    def can_return(self):
+        try:
+            if self.variant.product.is_returnable:
+                delta = timezone.localtime(timezone.now()).date() - self.date_delivered.date()
+
+                if delta.days <= settings.MAX_DAYS_BEFORE_RETURN:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        except:
+            return False
+
+
+    def cancel_or_notify(self):
+        if self.is_delivered is False:
+            self.is_cancelled = True
+            self.save()
+            # self.variant.product.seller.undelivered(self.total_amount)
+            return True
+        else:
+            return False
+
+    def return_item(self):
+        self.is_return_requested = True
+        self.save()
+        return
+
+    def return_item_complete(self):
+        self.is_return_completed = True
+        self.save()
+        self.variant.product.seller.undelivered(self.total_amount)
+        return
 
     def save(self, *args, **kwargs):
         if self.quantity <= 0:

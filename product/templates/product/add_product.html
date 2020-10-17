@@ -12,7 +12,8 @@ Add Product
 
     {{ form | crispy }}
      <hr>
-    <input type="file" name="images" multiple>
+    <label>Add Photos(multiple allowed): <input type="file" name="images" multiple></label>
+
     <hr>
     {{ formset.management_form }}
     {% for variant_form in formset %}

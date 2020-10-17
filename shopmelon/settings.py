@@ -114,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE =  'Asia/Calcutta'
 
 USE_I18N = True
 
@@ -142,6 +142,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 COMMISSION_RATE = 10 #percentage
+MAX_DAYS_BEFORE_RETURN = 10 #days
 
 from django.contrib.messages import constants as messages
 

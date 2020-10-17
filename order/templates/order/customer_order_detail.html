@@ -9,6 +9,7 @@ Order {{order.id}}
 <h1>Order {{order.id}}</h1>
 <b>Status: </b>{{ order.status.1 }}
 <div>
+    <b>Total Amount: </b>{{ total_amt }}
     <div>
         <h2>Address</h2>
         <p>{{ address.line1 }}</p>
@@ -25,6 +26,9 @@ Order {{order.id}}
                     <td>Variant</td>
                     <td>Quantity</td>
                     <td>Status</td>
+                    <td>Total Amount</td>
+                    <td>Date Delivered</td>
+                    <td>Cancel/Return</td>
                 </tr>
             </thead>
             {% for order_item in order_items %}
@@ -32,9 +36,81 @@ Order {{order.id}}
                 <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
                 <td>{{ order_item.quantity }}</td>
                 <td class = 'status'>{{ order_item.status.1 }}</td>
+                <td>{{ order_item.total_amount }}</td>
+                <td>{{ order_item.date_delivered }}</td>
+                <td>
+
+                    {% if order_item.status.0 == 'D' %}
+                    {% if order_item.can_return %}
+                    <button class="btn btn-danger return" data-id="{{ order_item.id }}">Return</button>
+                    {% endif %}
+                    {% elif order_item.status.0 == 'S' or order_item.status.0 == 'N' %}
+                    <button class="btn btn-danger cancel" data-id="{{ order_item.id }}">Cancel</button>
+                    {% endif %}
+
+                </td>
             </tr>
             {% endfor %}
         </table>
     </div>
 </div>
+{% endblock %}
+
+
+{% block script %}
+<script type="text/javascript">
+    $(document).on('click', '.cancel', function (e){
+        var val = $(this).attr('data-id')
+        btn = $(this)
+        td = $(this).parent()
+        myurl = '/order/ajax-cancel-return/'
+
+        if(confirm('Are you sure you want to cancel this item?')){
+            $.ajax({
+                type: 'POST',
+                url: myurl,
+                data: {
+                    'order_item_pk': val,
+                    'cancel': true,
+                },
+                dataType: 'json',
+                success: function (data){
+                    $('.alert').remove()
+                    if(data.type == 'success'){
+                        td.prev().prev().text(data.message)
+                        btn.remove()
+                    }
+                }
+            })
+        }
+
+    })
+
+    $(document).on('click', '.return', function (e){
+        var val = $(this).attr('data-id')
+        btn = $(this)
+        td = $(this).parent()
+        myurl = '/order/ajax-cancel-return/'
+
+        if(confirm('Are you sure you want to return this item?')){
+            $.ajax({
+                type: 'POST',
+                url: myurl,
+                data: {
+                    'order_item_pk': val,
+                    'cancel': false,
+                },
+                dataType: 'json',
+                success: function (data){
+                    $('.alert').remove()
+                    if(data.type == 'success'){
+                        td.prev().prev().text(data.message)
+                        btn.remove()
+                    }
+                }
+            })
+        }
+
+    })
+</script>
 {% endblock %}

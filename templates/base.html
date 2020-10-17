@@ -50,7 +50,7 @@
 
   <!-- Navbar -->
   {% if user.is_authenticated %}
-  <nav class="navbar fixed-top navbar-expand-lg navbar-light white scrolling-navbar">
+  <nav class="navbar fixed-top navbar-expand-lg navbar-light white scrolling-navbar mb-5">
     <div class="container">
 
       <!-- Brand -->
@@ -90,6 +90,9 @@
               <span class="clearfix d-none d-sm-inline-block"> Cart </span>
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link waves-effect" href="{% url 'customer-orders' %}">My Orders</a>
+          </li>
           {% endif %}
         </ul>
 
@@ -99,7 +102,7 @@
   </nav>
 
   {% else %}
-  <nav class="navbar fixed-top navbar-expand-lg navbar-light white scrolling-navbar">
+  <nav class="navbar fixed-top navbar-expand-lg navbar-light white scrolling-navbar mb-5">
     <div class="container">
 
       <!-- Brand -->

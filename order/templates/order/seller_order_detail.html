@@ -27,6 +27,8 @@ Order {{order.id}}
                     <td>Quantity</td>
                     <td>Amount</td>
                     <td>Status</td>
+                    <td>Date Delivered</td>
+                    <td>Return Complete</td>
                 </tr>
             </thead>
             {% for order_item in order_items %}
@@ -34,7 +36,13 @@ Order {{order.id}}
                 <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
                 <td>{{ order_item.quantity }}</td>
                 <td>{{ order_item.total_amount }}</td>
-                <td class = 'status'>{{ order_item.status.1 }}</td>
+                <td class = 'status {{ order_item.status.0 }}'>{{ order_item.status.1 }}</td>
+                <td>{{ order_item.date_delivered }}</td>
+                <td>
+                    {% if order_item.status.0 == 'RR' %}
+                    <button class="btn btn-success return-complete" data-id="{{ order_item.id }}">Return Complete</button>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </table>
@@ -45,14 +53,11 @@ Order {{order.id}}
         <b>You Get: </b>{{ you_get }}<br>
     </div>
 
-    <button class="btn btn-danger not-shipped">Not shipped</button>
-    <br>
-    <br>
+    {% if shipped_btn %}
     <button class="btn btn-success shipped">Shipped</button>
-    <br>
-    <br>
+    {% elif delivered_btn %}
     <button class="btn btn-success delivered">Delivered</button>
-
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -79,6 +84,7 @@ Order {{order.id}}
                         '</div>'
                 $('nav').after(str)
                 $('.status').text('Shipped')
+                $('.C').text('Cancelled')
             }
         })
     })
@@ -125,8 +131,36 @@ Order {{order.id}}
                         '</div>'
                 $('nav').after(str)
                 $('.status').text('Delivered')
+                $('.C').text('Cancelled')
             }
         })
+    })
+
+    $(document).on('click', '.return-complete', function (e){
+        var val = $(this).attr('data-id')
+        btn = $(this)
+        td = $(this).parent()
+        myurl = '/order/ajax-return-complete/'
+
+        if(confirm('Are you sure you have taken back return item?')){
+            $.ajax({
+                type: 'POST',
+                url: myurl,
+                data: {
+                    'order_item_pk': val,
+                },
+                dataType: 'json',
+                success: function (data){
+                    $('.alert').remove()
+                    if(data.type == 'success'){
+                        td.prev().prev().text(data.message)
+                        btn.remove()
+                    }
+                    $('.C').text('Cancelled')
+                }
+            })
+        }
+
     })
 </script>
 {% endblock %}

@@ -45,6 +45,7 @@ class Product(models.Model):
     has_variants = models.BooleanField(default=False)
     date_added = models.DateTimeField(auto_now_add=True)
     tags = models.ManyToManyField('Tag', null=True, blank=True)
+    is_returnable = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-date_added']
@@ -85,8 +86,7 @@ class Product(models.Model):
         elif count == 1:
             self.has_variants = False
             super().save(*args, **kwargs)
-        else:
-            self.delete()
+
         return
 
 
@@ -116,6 +116,11 @@ class Variant(models.Model):
 
     def order(self, quantity):
         self.quantity_available = self.quantity_available - quantity
+        self.save()
+
+    def unorder(self, quantity):
+        self.quantity_available = self.quantity_available + quantity
+        self.save()
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

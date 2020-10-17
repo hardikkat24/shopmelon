@@ -258,16 +258,12 @@ def product_description(request, pk):
     except:
         return HttpResponseNotFound('Page not found')
 
-    if not (hasattr(user, 'seller') and product.seller == user.seller):
-        return HttpResponseNotAllowed('You are not allowed to view this.')
-
     context = {
         'tags': product.tags.all(),
         'variants': product.variant_set.all(),
         'product': product,
         'images': product.productimage_set.all(),
     }
-    print(product.productimage_set.count())
     return render(request, 'product/product_description.html', context)
 
 

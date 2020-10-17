@@ -7,6 +7,7 @@ import os
 import razorpay
 from datetime import datetime
 from django.conf import settings
+from django.utils import timezone
 
 from user.models import Address
 from product.models import Variant
@@ -136,6 +137,7 @@ def place_order(request):
                     address.user = user
                     address.save()
                     address_id = address.pk
+                    print('redirect')
                     return redirect('create-order', address_id)
 
             else:
@@ -162,7 +164,7 @@ def create_order(request, pk):
         address = Address.objects.get(pk=pk)
     except:
         messages.info(request, 'No such address.')
-        redirect('cart')
+        return redirect('cart')
 
     data_order_related = checkOrder(order)
     if data_order_related['valid'] == False:
@@ -264,7 +266,7 @@ def pay_with_cod(request, pk):
         redirect('cart')
     order.is_order_placed = True
     order.address = address
-    order.date_ordered = datetime.now()
+    order.date_ordered = timezone.localtime(timezone.now())
     order.save()
 
     finaliseOrder(order, user)
@@ -313,9 +315,19 @@ def seller_order_detail(request, pk):
 
     order_items = order.orderitem_set.filter(variant__product__seller=user.seller)
 
+    shipped_btn = False
+    delivered_btn = False
+
     total_amt = 0
     for item in order_items:
-        total_amt = total_amt + item.total_amount
+        if not item.is_shipped:
+            shipped_btn = True
+        elif not item.is_delivered:
+            delivered_btn = True
+        if not item.is_cancelled and not item.is_return_requested:
+            total_amt = total_amt + item.total_amount
+
+
 
     context = {
         'order': order,
@@ -323,7 +335,9 @@ def seller_order_detail(request, pk):
         'address': order.address,
         'total_amount': total_amt,
         'commission': settings.COMMISSION_RATE,
-        'you_get': int(total_amt - total_amt*settings.COMMISSION_RATE/100)
+        'you_get': int(total_amt - total_amt*settings.COMMISSION_RATE/100),
+        'shipped_btn': shipped_btn,
+        'delivered_btn': delivered_btn
     }
 
     return render(request, 'order/seller_order_detail.html', context)
@@ -341,11 +355,13 @@ def ajax_sent_for_delivery(request):
     order_items = order.orderitem_set.filter(variant__product__seller=user.seller)
     total_amt = 0
     for item in order_items:
-        total_amt = total_amt + item.total_amount
+        if not item.is_cancelled and not item.is_return_requested:
+            total_amt = total_amt + item.total_amount
 
     if for_shipping == 'true':
         if order_items[0].is_delivered:
             user.seller.undelivered(total_amt)
+            order_items.update(date_delivered=None)
         if unsent == 'true':
             order_items.update(is_shipped=False, is_delivered=False)
         else:
@@ -354,6 +370,7 @@ def ajax_sent_for_delivery(request):
     else:
         if not order_items[0].is_delivered:
             user.seller.delivered(total_amt)
+            order_items.update(date_delivered=timezone.localtime(timezone.now()))
         order_items.update(is_shipped=True, is_delivered=True)
 
 
@@ -386,16 +403,24 @@ def customer_order_detail(request, pk):
         messages.info(request, 'No such order')
         return redirect('customer-orders')
 
+    total_amt = 0
+    for item in order.orderitem_set.all():
+        if not item.is_cancelled and not item.is_return_requested:
+            total_amt = total_amt + item.total_amount
+
     context = {
         'order': order,
         'address': order.address,
         'order_items': order.orderitem_set.all(),
+        'total_amt': total_amt,
     }
+
+
 
     return render(request, 'order/customer_order_detail.html', context)
 
 
-@login_required
+
 @csrf_exempt
 def ajax_quantity_cart(request):
     user = request.user
@@ -428,6 +453,67 @@ def ajax_quantity_cart(request):
     item_price = order_item.total_amount
     amount, quantity = order.get_total_amount_and_quantity()
     return JsonResponse({'message': 'Item successfully removed from cart', 'type': 'success', 'change': True, 'quantity':quantity, 'amount': amount, 'item_quantity': item_quantity, 'item_price': item_price})
+
+
+@login_required
+@csrf_exempt
+def ajax_cancel_return(request):
+    user = request.user
+
+    order_item_pk = request.POST.get('order_item_pk', 0)
+    cancel = request.POST.get('cancel')
+    if order_item_pk == '':
+        return JsonResponse({'message': 'Invalid data.', 'type': 'danger'})
+
+    try:
+        order_item = OrderItem.objects.get(pk=order_item_pk)
+    except:
+        return JsonResponse({'message': 'No such item in cart.', 'type': 'info'})
+
+
+    if not order_item.order.customer == user.customer:
+        return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+
+    if cancel == 'true':
+        bool = order_item.cancel_or_notify()
+        if bool:
+            order_item.variant.unorder(order_item.quantity)
+            return JsonResponse({'message': 'Cancelled', 'type': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+
+    else:
+        bool = order_item.can_return
+        if bool:
+            order_item.return_item()
+            order_item.variant.unorder(order_item.quantity)
+            return JsonResponse({'message': 'Return Requested', 'type': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+
+
+@login_required
+@csrf_exempt
+def ajax_return_complete(request):
+    user = request.user
+
+    order_item_pk = request.POST.get('order_item_pk', 0)
+    if order_item_pk == '':
+        return JsonResponse({'message': 'Invalid data.', 'type': 'danger'})
+
+    try:
+        order_item = OrderItem.objects.get(pk=order_item_pk)
+    except:
+        return JsonResponse({'message': 'No such item in cart.', 'type': 'info'})
+
+
+    if not order_item.variant.product.seller == user.seller:
+        return JsonResponse({'message': 'Invalid request', 'type': 'danger'})
+
+    order_item.return_item_complete()
+    return JsonResponse({'message': 'Returned', 'type': 'success'})
+
+
 # @login_required
 # def invoice(request, pk):
 #     user = request.user

@@ -21,4 +21,6 @@ urlpatterns = [
     path('ajax-quantity-cart/', views.ajax_quantity_cart, name='ajax-quantity-cart'),
 
     path('seller-dashboard/', views.seller_dashboard, name='seller-dashboard'),
+    path('ajax-cancel-return/', views.ajax_cancel_return, name='ajax-cancel-return'),
+    path('ajax-return-complete/', views.ajax_return_complete, name='ajax-return-complete'),
 ]
