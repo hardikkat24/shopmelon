@@ -39,7 +39,7 @@ VariantFormsetUpdate = modelformset_factory(
 
 class ProductFilterForm(forms.Form):
     text = forms.CharField(required=False)
-    category = forms.ChoiceField(choices=[(0,'-----')+x], required=False)
+    category = forms.ChoiceField(choices=[(0,'-----')]+x, required=False)
     price_gt = forms.DecimalField(label = 'Price from: ', required=False)
     price_lt = forms.DecimalField(label = 'Price to: ', required=False)
 
