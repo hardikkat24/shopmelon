@@ -2,6 +2,10 @@ from django import forms
 from django.forms import modelformset_factory, inlineformset_factory
 from .models import Product, Variant, Category
 
+try:
+    x = list(Category.objects.values_list('id', 'name'))
+except:
+    x = [('', '')]
 
 class ProductCreationForm(forms.ModelForm):
     class Meta:
@@ -35,7 +39,7 @@ VariantFormsetUpdate = modelformset_factory(
 
 class ProductFilterForm(forms.Form):
     text = forms.CharField(required=False)
-    category = forms.ChoiceField(choices=[(0,'-----')]+list(Category.objects.values_list('id','name')), required=False)
+    category = forms.ChoiceField(choices=[(0,'-----')+x], required=False)
     price_gt = forms.DecimalField(label = 'Price from: ', required=False)
     price_lt = forms.DecimalField(label = 'Price to: ', required=False)
 
