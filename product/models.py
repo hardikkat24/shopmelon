@@ -44,7 +44,7 @@ class Product(models.Model):
     note = models.CharField(max_length=200, null=True, blank=True)
     has_variants = models.BooleanField(default=False)
     date_added = models.DateTimeField(auto_now_add=True)
-    tags = models.ManyToManyField('Tag', null=True, blank=True)
+    tags = models.ManyToManyField('Tag')
     is_returnable = models.BooleanField(default=False)
 
     class Meta:
@@ -75,7 +75,8 @@ class Product(models.Model):
         objList = []
         for tag in tags:
             if tag != '':
-                self.tags.add(Tag.objects.get_or_create(name=tag.lower())[0])
+                objList.append(Tag.objects.get_or_create(name=tag.lower())[0])
+        self.tags.add(*objList)
         super().save(*args, **kwargs)
 
 
