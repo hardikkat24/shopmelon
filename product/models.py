@@ -75,9 +75,9 @@ class Product(models.Model):
         objList = []
         for tag in tags:
             if tag != '':
-                objList.append(Tag.objects.get_or_create(name=tag.lower())[0])
-        self.tags.add(*objList)
+                self.tags.add(Tag.objects.get_or_create(name=tag.lower())[0])
         super().save(*args, **kwargs)
+
 
         count = self.variant_set.count()
         if count > 1:
