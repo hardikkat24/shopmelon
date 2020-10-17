@@ -31,4 +31,8 @@ urlpatterns = [
     path('search/', views.search, name='search'),
 
     path('manage-products/', views.manage_products, name='manage-products'),
+    path('manage-variants/<pk>/', views.manage_variants, name='manage-variants'),
+    path('manage-images/<pk>/', views.manage_images, name='manage-images'),
+    path('ajax-delete-image/', views.ajax_delete_image, name='ajax-delete-image'),
+
 ]

@@ -6,8 +6,8 @@ from django.http import HttpResponseNotFound, HttpResponseNotAllowed, JsonRespon
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from product.models import Product, Variant, Tag, Category
-from .forms import ProductCreationForm, VariantFormset, VariantFormsetUpdate, TagCreationForm, ProductFilterForm
+from product.models import Product, Variant, Tag, Category, ProductImage
+from .forms import ProductCreationForm, VariantFormset, VariantFormsetUpdate, TagCreationForm, ProductFilterForm, VariantNewFormset
 
 
 @login_required
@@ -29,6 +29,13 @@ def add_product(request):
             product = form.save(commit=False)
             product.seller = user.seller
             product.save()
+
+            for file in request.FILES.getlist('images'):
+                instance = ProductImage(
+                    product=product,
+                    image=file
+                )
+                instance.save()
 
             if product.has_variants:
                 # has_variants => multiple saved
@@ -70,53 +77,110 @@ def update_product(request, pk):
 
     if request.method == 'POST':
         form = ProductCreationForm(request.POST, request.FILES, instance = product)
-        formset = VariantFormsetUpdate(request.POST, request.FILES)
-        print(1)
-        if formset.is_valid() and form.is_valid():
-            print(2)
-            # tags = form.cleaned_data['tag_s']
-            # print(tags)
 
+        if form.is_valid():
             product_new = form.save(commit=False)
-            if len(formset) > 1:
-                product.has_variants = True
             product_new.save()
-
-            if product_new.has_variants:
-                # has_variants => multiple saved
-                for variant_form in formset:
-                    variant = variant_form.save(commit=False)
-                    variant.product = product
-                    try:
-                        variant.save()
-                    except:
-                        pass
-
-            else:
-                try:
-                    variant = formset[0].save(commit=False)
-                    variant.product = product
-                    variant.save()
-                except:
-                    pass
-
-                product_new.save()
-
             return redirect('product-description', product.pk)
     else:
         form = ProductCreationForm(instance=product)
-        qs = Variant.objects.none()
-        formset = VariantFormsetUpdate(queryset=qs)
 
     print(variants)
     context = {
         'product': product,
         'form': form,
-        'formset': formset,
         'variants': variants,
     }
 
     return render(request, 'product/update_product.html', context)
+
+
+@login_required
+def manage_variants(request, pk):
+    user = request.user
+    try:
+        product = Product.objects.get(pk=pk)
+        variants = product.variant_set.all()
+    except:
+        return HttpResponseNotFound('Page not found')
+    if not (hasattr(user, 'seller') and product.seller == user.seller):
+        return HttpResponseNotAllowed('You are not allowed to view this page.')
+
+
+    if request.method == 'POST':
+        # updating existing variants quantities available
+        for key in request.POST.keys():
+            if key.isnumeric():
+                variant = Variant.objects.get(pk=key)
+                qty = int(request.POST.get(key))
+                if qty <= 0:
+                    variant.delete()
+                else:
+                    variant.quantity_available = qty
+                    variant.save()
+
+        formset = VariantNewFormset(request.POST, request.FILES, instance = product)
+        if formset.is_valid():
+            formset.save()
+            formset = VariantNewFormset()
+
+        product.save()
+
+    else:
+        formset = VariantNewFormset()
+    context = {
+        'product': product,
+        'variants': variants,
+        'formset': formset,
+    }
+
+    return render(request, 'product/manage_variants.html', context)
+
+
+@login_required
+def manage_images(request, pk):
+    user = request.user
+    try:
+        product = Product.objects.get(pk=pk)
+        images = product.productimage_set.all()
+    except:
+        return HttpResponseNotFound('Page not found')
+    if not (hasattr(user, 'seller') and product.seller == user.seller):
+        return HttpResponseNotAllowed('You are not allowed to view this page.')
+
+    if request.method == 'POST':
+        for file in request.FILES.getlist('images'):
+            instance = ProductImage(
+                product=product,
+                image=file
+            )
+            instance.save()
+
+    context = {
+        'product': product,
+        'images': images
+    }
+
+    return render(request, 'product/manage_images.html', context)
+
+
+@login_required
+@csrf_exempt
+def ajax_delete_image(request):
+    data = request.POST.get('id', None)
+    id = json.loads(data)
+
+    try:
+        product_image = ProductImage.objects.get(pk=id)
+        product_image.delete()
+        message = 'Success'
+    except:
+        message = 'Failure'
+
+    response = {
+        'message': message
+    }
+    return JsonResponse(response)
 
 
 @login_required
@@ -138,7 +202,6 @@ def search(request):
     form = ProductFilterForm(request.GET)
 
     if form.is_valid():
-        print(form.cleaned_data)
         text = form.cleaned_data['text']
         category_pk = form.cleaned_data['category']
         price_gt = form.cleaned_data['price_gt']
@@ -196,15 +259,15 @@ def product_description(request, pk):
         return HttpResponseNotFound('Page not found')
 
     if not (hasattr(user, 'seller') and product.seller == user.seller):
-        has_update_permission = False
+        return HttpResponseNotAllowed('You are not allowed to view this.')
 
     context = {
-        'has_update_permission': has_update_permission,
         'tags': product.tags.all(),
         'variants': product.variant_set.all(),
         'product': product,
+        'images': product.productimage_set.all(),
     }
-
+    print(product.productimage_set.count())
     return render(request, 'product/product_description.html', context)
 
 
@@ -229,10 +292,10 @@ def ajax_delete_variant(request):
     data = request.POST.get('id', None)
     id = json.loads(data)
 
-    print(id)
     try:
         variant = Variant.objects.get(pk=id)
         variant.delete()
+        variant.product.save()
         message = 'Success'
     except:
         message = 'Failure'

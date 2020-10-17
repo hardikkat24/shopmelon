@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Manage Photos
+{% endblock %}
+
+{% block content %}
+<h1>Manage Photos({{ product.name }})</h1>
+<form method="POST" enctype="multipart/form-data" class = "formset">
+    {% csrf_token %}
+    <table class="table">
+        <tr>
+            <td>Image</td>
+            <td>Remove</td>
+        </tr>
+        {% for image in images %}
+        <tr>
+            <td><img src = "{{ image.image_url }}" class="img-fluid"></td>
+            <td>
+                <button class = "btn btn-danger btn-sm text-white delete-image-existing" data-id="{{ image.id }}">
+                    &times;
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <hr>
+    <label>Upload multiple images: <input type="file" name="images" multiple></label>
+    <br>
+    <button type = "submit" class = "btn btn-primary">Add</button>
+</form>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $(document).on('click', '.delete-image-existing', function (e){
+        e.preventDefault()
+        btn = e.target
+        btn = $(btn)
+        row = e.target.parentElement.parentElement
+        row = $(row)
+
+        id = btn.attr('data-id')
+        $.ajax({
+            type: 'POST',
+            url: '/product/ajax-delete-image/',
+            data: {
+                'id': id
+            },
+            dataType: 'json',
+            success: function (data){
+                row.remove()
+            }
+        })
+    })
+</script>
+{% endblock %}

@@ -40,3 +40,4 @@ class ProductFilterForm(forms.Form):
     price_lt = forms.DecimalField(label = 'Price to: ', required=False)
 
 
+VariantNewFormset = inlineformset_factory(Product, Variant, fields=('type', 'name', 'quantity_available', 'image'), can_delete=False, extra=5)

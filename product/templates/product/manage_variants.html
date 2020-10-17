@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Manage Variants
+{% endblock %}
+
+{% block content %}
+<h1>Manage Variants</h1>
+<form method="POST" enctype="multipart/form-data" class = "formset">
+    {% csrf_token %}
+    <table class="table">
+        <tr>
+            <td>Type</td>
+            <td>Name</td>
+            <td>Quantity Available</td>
+            <td>Remove</td>
+        </tr>
+        {% for variant in variants %}
+        <tr>
+            <td>{{ variant.get_type_display }}</td>
+            <td>{{ variant.name }}</td>
+            <td><input type="number" id="quantity" name="{{ variant.id }}" value="{{ variant.quantity_available }}"></td>
+            <td>
+                <button class = "btn btn-danger btn-sm text-white delete-variant-existing" data-id="{{ variant.id }}">
+                    &times;
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <hr>
+    {{ formset.management_form }}
+    {{ formset.non_form_errors.as_ul }}
+<table id="formset" class="form">
+{% for form in formset.forms %}
+  {% if forloop.first %}
+  <thead><tr>
+    {% for field in form.visible_fields %}
+    <th>{{ field.label|capfirst }}</th>
+    {% endfor %}
+  </tr></thead>
+  {% endif %}
+  <tr class="{% cycle row1 row2 %}">
+  {% for field in form.visible_fields %}
+    <td>
+    {# Include the hidden fields in the form #}
+    {% if forloop.first %}
+      {% for hidden in form.hidden_fields %}
+      {{ hidden }}
+      {% endfor %}
+    {% endif %}
+      {{ field.errors.as_ul }}
+      {{ field }}
+    </td>
+  {% endfor %}
+  </tr>
+{% endfor %}
+</table>
+    <button type = "submit" class = "btn btn-primary">Update</button>
+</form>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $(document).on('click', '.delete-variant-existing', function (e){
+        e.preventDefault()
+        btn = e.target
+        btn = $(btn)
+        row = e.target.parentElement.parentElement
+        row = $(row)
+
+        id = btn.attr('data-id')
+        $.ajax({
+            type: 'POST',
+            url: '/product/delete-variant/',
+            data: {
+                'id': id
+            },
+            dataType: 'json',
+            success: function (data){
+                row.remove()
+            }
+        })
+    })
+</script>
+{% endblock %}

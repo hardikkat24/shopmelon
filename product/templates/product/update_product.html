@@ -8,46 +8,11 @@ Update Product
 {% block content %}
 <h1>Update Product</h1>
 <a href = "{% url 'tags' product.pk %}"class = "btn btn-primary">Manage Tags</a>
+<a href = "{% url 'manage-variants' product.pk %}"class = "btn btn-primary">Manage Variants</a>
+<a href = "{% url 'manage-images' product.pk %}"class = "btn btn-primary">Manage Images</a>
 <form method="POST" enctype="multipart/form-data" class = "formset">
     {% csrf_token %}
     {{ form | crispy }}
-
-    <table class="table">
-        <tr>
-            <td>Type</td>
-            <td>Name</td>
-            <td>Quantity Available</td>
-            <td>Remove</td>
-        </tr>
-        {% for variant in variants %}
-        <tr>
-            <td>{{ variant.get_type_display }}</td>
-            <td>{{ variant.name }}</td>
-            <td>{{ variant.quantity_available }}</td>
-            <td>
-                <button class = "btn btn-danger btn-sm text-white delete-variant-existing" data-id="{{ variant.id }}">
-                    &times;
-                </button>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    <hr>
-    {{ formset.management_form }}
-    {% for variant_form in formset %}
-        <div class = "form-row">
-            {{ variant_form | crispy }}
-            <div class="right">
-                <button class = "btn btn-danger btn-sm text-white delete-variant-new">
-                    &times;
-                </button>
-            </div>
-        </div>
-    <hr>
-    {% endfor %}
-    <button class = "btn btn-primary add-form-row">Add Variant</button>
-    <hr>
-    <br>
     <button type = "submit" class = "btn btn-primary">Update</button>
     <a type = "submit" class = "btn btn-danger" href="{% url 'delete-product' product.pk %}">Delete</a>
 </form>

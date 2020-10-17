@@ -41,7 +41,6 @@ class Product(models.Model):
     unit_mrp = models.IntegerField(null=False, blank=False)
     is_adult = models.BooleanField(default=False)
     style = models.CharField(max_length=100, null=True, blank=True)
-    image = models.ImageField(upload_to='product/product/images/', default='default/product_image.jpg')
     note = models.CharField(max_length=200, null=True, blank=True)
     has_variants = models.BooleanField(default=False)
     date_added = models.DateTimeField(auto_now_add=True)
@@ -64,7 +63,7 @@ class Product(models.Model):
     @property
     def image_url(self):
         try:
-            url = self.image.url
+            url = self.productimage_set.first().image.url
         except:
             url = ''
         return url
@@ -79,17 +78,15 @@ class Product(models.Model):
         self.tags.add(*objList)
         super().save(*args, **kwargs)
 
-        if self.variant_set.count() > 1:
+        count = self.variant_set.count()
+        if count > 1:
             self.has_variants = True
             super().save(*args, **kwargs)
-
-        img = Image.open(self.image.path)
-
-        if img.height > 800 or img.width > 800:
-            output_size = (800, 800)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
-
+        elif count == 1:
+            self.has_variants = False
+            super().save(*args, **kwargs)
+        else:
+            self.delete()
         return
 
 
@@ -140,3 +137,30 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='product/product/images/', default='default/product_image.jpg')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            img = Image.open(self.image.path)
+
+            if img.height > 800 or img.width > 800:
+                output_size = (800, 800)
+                img.thumbnail(output_size)
+                img.save(self.image.path)
+        except:
+            pass
+
+        return
+
+    @property
+    def image_url(self):
+        try:
+            url = self.image.url
+        except:
+            url = ''
+        return url

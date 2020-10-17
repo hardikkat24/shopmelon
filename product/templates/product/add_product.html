@@ -9,14 +9,18 @@ Add Product
 <h1>Add Product</h1>
 <form method="POST" enctype="multipart/form-data" class = "formset">
     {% csrf_token %}
+
     {{ form | crispy }}
      <hr>
+    <input type="file" name="images" multiple>
+    <hr>
     {{ formset.management_form }}
     {% for variant_form in formset %}
         <div class = "form-row">
             {{ variant_form | crispy }}
         </div>
     {% endfor %}
+
     <button class = "btn btn-primary add-form-row">Add Variant</button>
     <button class = "btn btn-primary remove-form-row">Remove Variant</button>
     <hr>
