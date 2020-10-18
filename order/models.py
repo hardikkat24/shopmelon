@@ -132,3 +132,7 @@ class Payment(models.Model):
     amount = models.IntegerField(null=False, blank=False)
     description = models.TextField(null=True, blank=True)
 
+
+class WishlistItem(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)

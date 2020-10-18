@@ -104,6 +104,7 @@
 <div class="form-group row">
     <input type="number" name="quantity" class="form-control col-1" id="quantity">
     <button class = "btn btn-primary" id = "add-to-cart">Add to Cart</button>
+    <button class = "btn btn-primary" id = "add-to-wishlist">Add to Wishlist</button>
 
 </div>
 {% endif %}
@@ -146,6 +147,29 @@
                 },
             })
         }
+    })
+
+    $(document).on('click', '#add-to-wishlist', function(e){
+        variant_pk = $('input[name=variant]:checked').val()
+
+        myurl = '/order/ajax-add-to-wishlist/'
+
+        $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'variant_pk': variant_pk,
+            },
+            dataType: 'json',
+            success: function (data){
+                $('.alert').remove()
+                str = '<div class="alert alert-'+data.type+' alert-dismissible pt-4 mt-5" role="alert">' +
+                        data.message +
+                        '</div>'
+                $('nav').after(str)
+            },
+        })
+
     })
 
 

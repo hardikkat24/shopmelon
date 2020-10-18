@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from user.models import Address
 from product.models import Variant
-from order.models import Order, OrderItem
+from order.models import Order, OrderItem, WishlistItem
 from .forms import AddressForm
 from.utils import checkOrder, finaliseOrder
 
@@ -513,6 +513,49 @@ def ajax_return_complete(request):
     order_item.return_item_complete()
     return JsonResponse({'message': 'Returned', 'type': 'success'})
 
+
+@csrf_exempt
+@login_required
+def ajax_add_to_wishlist(request):
+    user = request.user
+
+    variant_pk = request.POST.get('variant_pk', None)
+
+    if variant_pk is None:
+        return JsonResponse({'message': 'Please select a variant.', 'type': 'info'})
+
+    try:
+        variant = Variant.objects.get(pk=variant_pk)
+    except:
+        return JsonResponse({'message': 'Invalid variant.', 'type': 'info'})
+
+    item, _ = WishlistItem.objects.get_or_create(customer=user.customer, variant=variant)
+
+    return JsonResponse({'message': 'Item successfully added to wishlist.', 'type': 'success'})
+
+
+@login_required
+def wishlist(request):
+    user = request.user
+
+    try:
+
+        items = user.customer.wishlistitem_set.all()
+
+        if len(items) == 0:
+            raise Exception("Sorry, no numbers below zero")
+        context = {
+            'wishlist_is_empty': False,
+            'items': items,
+        }
+
+    except:
+        context = {
+            'wishlist_is_empty': True,
+        }
+
+
+    return render(request, 'order/wishlist.html', context)
 
 # @login_required
 # def invoice(request, pk):

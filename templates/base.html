@@ -79,6 +79,9 @@
           <li class="nav-item">
             <a class="nav-link waves-effect" href="{% url 'logout' %}">Logout</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link waves-effect" href="{% url 'profile' %}">Hello {{ user.first_name }} {{ user.last_name }}</a>
+          </li>
           {% if user.seller %}
             <li class="nav-item">
             <a class="nav-link waves-effect" href="{% url 'seller-dashboard' %}">Dashboard</a>
@@ -92,6 +95,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link waves-effect" href="{% url 'customer-orders' %}">My Orders</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link waves-effect" href="{% url 'wishlist' %}">Wishlist</a>
           </li>
           {% endif %}
         </ul>

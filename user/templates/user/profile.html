@@ -12,7 +12,6 @@ Profile
 <div>Email: {{ user.email }}</div>
 {% if is_customer %}
     <div>Phone: {{ customer.phone }}</div>
-    <div>Phone Verification: {% if customer.is_phone_verified %}Complete{% else %}Not Verified{% endif %}</div>
 {% endif %}
 {% if is_seller %}
     <div>Business Name: {{ seller.business_name }}</div>

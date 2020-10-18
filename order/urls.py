@@ -3,7 +3,9 @@ from order import views
 
 urlpatterns = [
     path('add-to-cart/', views.ajax_add_to_cart, name='ajax-add-to-cart'),
+    path('ajax-add-to-wishlist/', views.ajax_add_to_wishlist, name='ajax-add-to-wishlist'),
     path('cart/', views.cart, name='cart'),
+    path('wishlist/', views.wishlist, name='wishlist'),
     path('ajax-delete-from-cart/', views.ajax_delete_from_cart, name='ajax-delete-from-cart'),
     path('place-order/', views.place_order, name='place-order'),
     path('create-order/<pk>/', views.create_order, name='create-order'),
@@ -23,4 +25,5 @@ urlpatterns = [
     path('seller-dashboard/', views.seller_dashboard, name='seller-dashboard'),
     path('ajax-cancel-return/', views.ajax_cancel_return, name='ajax-cancel-return'),
     path('ajax-return-complete/', views.ajax_return_complete, name='ajax-return-complete'),
+
 ]

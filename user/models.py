@@ -47,7 +47,6 @@ class CustomUser(AbstractUser):
 class Customer(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     phone = models.CharField(max_length=10, null=False, blank=False)
-    is_phone_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.user)

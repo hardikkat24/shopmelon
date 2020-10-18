@@ -17,7 +17,7 @@ class CustomUserUpdateForm(forms.ModelForm):
 class CustomerCreationForm(forms.ModelForm):
     class Meta:
         model = Customer
-        exclude = ('is_phone_verified', 'user')
+        exclude = ('user', )
 
 
 class SellerCreationForm1(forms.ModelForm):
@@ -29,7 +29,7 @@ class SellerCreationForm1(forms.ModelForm):
 class SellerCreationForm2(forms.ModelForm):
     class Meta:
         model = Seller
-        exclude = ('user', 'is_verified',)
+        exclude = ('user', 'is_verified', 'amount_for_delivered')
 
 
 

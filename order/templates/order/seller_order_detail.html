@@ -55,9 +55,9 @@ Order {{order.id}}
 
     {% if shipped_btn %}
     <button class="btn btn-success shipped">Shipped</button>
-    {% elif delivered_btn %}
-    <button class="btn btn-success delivered">Delivered</button>
     {% endif %}
+    <button class="btn btn-success delivered {% if shipped_btn %}d-none{% endif %}">Delivered</button>
+
 </div>
 {% endblock %}
 
@@ -65,7 +65,9 @@ Order {{order.id}}
 {% block script %}
 <script type="text/javascript">
     order_id = $('#order').val()
+
     $(document).on('click', '.shipped', function (e){
+        this_btn = $(this)
         myurl = '/order/ajax-sent-for-delivery/'
 
         $.ajax({
@@ -85,6 +87,8 @@ Order {{order.id}}
                 $('nav').after(str)
                 $('.status').text('Shipped')
                 $('.C').text('Cancelled')
+                $('.delivered').removeClass('d-none')
+                this_btn.addClass('d-none')
             }
         })
     })

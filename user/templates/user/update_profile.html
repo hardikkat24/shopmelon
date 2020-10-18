@@ -2,19 +2,21 @@
 {% load crispy_forms_tags %}
 
 {% block title %}
-Signup
+Update Profile
 {% endblock %}
 
 {% block content %}
-<h1>Signup</h1>
+<h1>Update Profile</h1>
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form1 | crispy }}
     {% if is_customer_or_seller %}
         {{ form2 | crispy }}
     {% endif %}
-    <button type = "submit" class = "btn btn-primary">Sign Up</button>
+    <button type = "submit" class = "btn btn-primary">Update</button>
 </form>
+
+<a class = "mt-2" href = "{% url 'change-password' %}">Reset Password</a><br>
 {% endblock %}
 
 {% block script %}
