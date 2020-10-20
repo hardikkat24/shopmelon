@@ -319,6 +319,7 @@ def seller_order_detail(request, pk):
     delivered_btn = False
 
     total_amt = 0
+    you_get = 0
     for item in order_items:
         if not item.is_shipped:
             shipped_btn = True
@@ -326,6 +327,7 @@ def seller_order_detail(request, pk):
             delivered_btn = True
         if not item.is_cancelled and not item.is_return_requested:
             total_amt = total_amt + item.total_amount
+            you_get = you_get + item.amt_reducing_commission
 
     try:
         packaging_pdf = PackagingPDF.objects.get(order=order, seller=user.seller)
@@ -337,8 +339,7 @@ def seller_order_detail(request, pk):
         'order_items': order_items,
         'address': order.address,
         'total_amount': total_amt,
-        'commission': settings.COMMISSION_RATE,
-        'you_get': int(total_amt - total_amt*settings.COMMISSION_RATE/100),
+        'you_get': you_get,
         'shipped_btn': shipped_btn,
         'delivered_btn': delivered_btn,
         'packaging_pdf': packaging_pdf
@@ -358,13 +359,16 @@ def ajax_sent_for_delivery(request):
 
     order_items = order.orderitem_set.filter(variant__product__seller=user.seller)
     total_amt = 0
+    you_get = 0
     for item in order_items:
         if not item.is_cancelled and not item.is_return_requested:
             total_amt = total_amt + item.total_amount
+            you_get = you_get + item.amt_reducing_commission
 
     if for_shipping == 'true':
         if order_items[0].is_delivered:
             user.seller.undelivered(total_amt)
+            user.seller.decrease_earning(you_get)
             order_items.update(date_delivered=None)
         if unsent == 'true':
             order_items.update(is_shipped=False, is_delivered=False)
@@ -374,6 +378,7 @@ def ajax_sent_for_delivery(request):
     else:
         if not order_items[0].is_delivered:
             user.seller.delivered(total_amt)
+            user.seller.increase_earning(you_get)
             order_items.update(date_delivered=timezone.localtime(timezone.now()))
         order_items.update(is_shipped=True, is_delivered=True)
 

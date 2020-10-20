@@ -62,6 +62,7 @@ class Seller(models.Model):
     aadhar_no = models.CharField(max_length=12, null=True, blank=True)
     pan_no = models.CharField(max_length=10, null=True, blank=True)
     amount_for_delivered = models.IntegerField(default=0)
+    amount_he_gets = models.IntegerField(default=0)
     gst_no = models.CharField(max_length=11, null=True, blank=True, verbose_name='GST Number')
     # banking details
     bank_ifsc_code = models.CharField(max_length=11, null=True, blank=True, verbose_name='Bank IFSC Code')
@@ -82,6 +83,13 @@ class Seller(models.Model):
         self.amount_for_delivered = self.amount_for_delivered - amount
         self.save()
 
+    def increase_earning(self, amount):
+        self.amount_he_gets = self.amount_he_gets + amount
+        self.save()
+
+    def decrease_earning(self, amount):
+        self.amount_he_gets = self.amount_he_gets - amount
+        self.save()
 
 class Address(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

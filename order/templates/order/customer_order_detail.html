@@ -104,7 +104,7 @@ Order {{order.id}}
                 success: function (data){
                     $('.alert').remove()
                     if(data.type == 'success'){
-                        td.prev().prev().text(data.message)
+                        td.prev().prev().prev().text(data.message)
                         btn.remove()
                     }
                 }

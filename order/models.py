@@ -65,6 +65,11 @@ class OrderItem(models.Model):
     date_delivered = models.DateTimeField(null=True, blank=True)
     is_return_requested = models.BooleanField(default=False)
     is_return_completed = models.BooleanField(default=False)
+
+    @property
+    def amt_reducing_commission(self):
+        x = int(self.total_amount*(1 - self.variant.product.category.commission/100))
+        return x
     @property
     def total_amount(self):
         return self.quantity * self.variant.product.unit_price
@@ -117,6 +122,7 @@ class OrderItem(models.Model):
         self.is_return_completed = True
         self.save()
         self.variant.product.seller.undelivered(self.total_amount)
+        self.variant.product.seller.decrease_earning(self.amt_reducing_commission)
         return
 
     def save(self, *args, **kwargs):
