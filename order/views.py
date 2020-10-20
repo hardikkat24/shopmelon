@@ -6,7 +6,6 @@ from django.contrib import messages
 import os
 import razorpay
 from datetime import datetime
-from django.conf import settings
 from django.utils import timezone
 
 from user.models import Address
@@ -280,8 +279,6 @@ def seller_dashboard(request):
     context = {
         'seller': user.seller,
         'total_amount': total_amt,
-        'commission': settings.COMMISSION_RATE,
-        'you_get': int(total_amt - total_amt * settings.COMMISSION_RATE / 100)
     }
 
     return render(request, 'order/seller_dashboard.html', context)

@@ -10,8 +10,7 @@ Dashboard
 <div>
     <div>
         <b>Total Amount: </b>{{ total_amount }}<br>
-        <b>Commission: </b>{{ commission }}%<br>
-        <b>You Get: </b>{{ you_get }}<br>
+        <b>You Get: </b>{{ seller.amount_he_gets}}<br>
     </div>
     <a class="btn btn-primary shipped" href = "{% url 'manage-products' %}">Manage Products</a>
     <br>
