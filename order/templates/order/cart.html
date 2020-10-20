@@ -28,7 +28,7 @@ Cart
                 </thead>
                 {% for order_item in order_items %}
                 <tr>
-                    <td><a href="{% url 'product-description' order_item.variant.product.pk %}"><<img width="200px" src = "{{ order_item.variant.product.image_url }}"></a></td>
+                    <td><a href="{% url 'product-description' order_item.variant.product.pk %}"><img width="200px" src = "{{ order_item.variant.product.image_url }}"></a></td>
                     <td>{{ order_item.variant.product.name }} ({{ order_item.variant.name }})</td>
                     <td>
                         <button class = "btn btn-danger btn-sm text-white decrease-qty" data-id="{{ order_item.pk }}">-</button>

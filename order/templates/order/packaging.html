@@ -113,7 +113,7 @@
 
                             </td>
                             <td>
-                                Invoice #: Order-{{ order.id }}<br>
+                                Order #: Order-{{ order.id }}<br>
                                 Order Date: {{ order.date_ordered }}<br>
                             </td>
                         </tr>
@@ -126,15 +126,18 @@
                     <table>
                         <tr>
                             <td>
+                                <h2>Address</h2>
                                 {{ address.line1 }} <br>
                                 {{ address.line2 }} <br>
                                 {{ address.city }}, {{ address.state }}({{ address.pincode }}) <br>
                             </td>
                             <td>
-
+                                <h2>Seller Info</h2>
+                                Business Name: {{ seller.business_name }} <br>
                             </td>
                             <td>
-
+                                <h2>Buyer Info</h2>
+                                Buyer's Name: {{ user.first_name }} {{ user.last_name }}<br>
                             </td>
                         </tr>
                     </table>
@@ -151,9 +154,6 @@
                 <td>
                     Total Price
                 </td>
-                <td>
-                    Seller Info
-                </td>
             </tr>
             {% for order_item in order_items %}
             <tr class="item">
@@ -165,10 +165,6 @@
                 </td>
                 <td>
                     {{ order_item.total_amount }}
-                </td>
-                <td>
-                    {{ order_item.variant.product.seller.business_name }}<br>
-                    (GST Number - {{ order_item.variant.product.seller.gst_no }})
                 </td>
             </tr>
             {% endfor %}

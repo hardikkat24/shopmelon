@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.conf import settings
 
-from user.models import Customer, Address
+from user.models import Customer, Address, Seller
 from product.models import Product, Variant
 
 PAYMENT_TYPE_CHOICES = [
@@ -136,3 +136,9 @@ class Payment(models.Model):
 class WishlistItem(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+
+
+class PackagingPDF(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
+    pdf_url = models.URLField(null=True, blank=True)

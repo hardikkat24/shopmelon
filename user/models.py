@@ -62,6 +62,14 @@ class Seller(models.Model):
     aadhar_no = models.CharField(max_length=12, null=True, blank=True)
     pan_no = models.CharField(max_length=10, null=True, blank=True)
     amount_for_delivered = models.IntegerField(default=0)
+    gst_no = models.CharField(max_length=11, null=True, blank=True, verbose_name='GST Number')
+    # banking details
+    bank_ifsc_code = models.CharField(max_length=11, null=True, blank=True, verbose_name='Bank IFSC Code')
+    bank_branch_name = models.CharField(max_length=200, null=True, blank=True, verbose_name='Bank Branch Name')
+    bank_account_bearers_name = models.CharField(max_length=200, null=True, blank=True, verbose_name="Bank Account bearer's name")
+    upi_address = models.CharField(max_length=200, null=True, blank=True, verbose_name='UPI Address')
+
+
 
     def __str__(self):
         return str(self.business_name) + ": " + str(self.user)

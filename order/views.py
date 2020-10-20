@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from user.models import Address
 from product.models import Variant
-from order.models import Order, OrderItem, WishlistItem
+from order.models import Order, OrderItem, WishlistItem, PackagingPDF
 from .forms import AddressForm
 from.utils import checkOrder, finaliseOrder
 
@@ -327,7 +327,10 @@ def seller_order_detail(request, pk):
         if not item.is_cancelled and not item.is_return_requested:
             total_amt = total_amt + item.total_amount
 
-
+    try:
+        packaging_pdf = PackagingPDF.objects.get(order=order, seller=user.seller)
+    except:
+        packaging_pdf = ''
 
     context = {
         'order': order,
@@ -337,7 +340,8 @@ def seller_order_detail(request, pk):
         'commission': settings.COMMISSION_RATE,
         'you_get': int(total_amt - total_amt*settings.COMMISSION_RATE/100),
         'shipped_btn': shipped_btn,
-        'delivered_btn': delivered_btn
+        'delivered_btn': delivered_btn,
+        'packaging_pdf': packaging_pdf
     }
 
     return render(request, 'order/seller_order_detail.html', context)

@@ -52,7 +52,8 @@ Order {{order.id}}
         <b>Commission: </b>{{ commission }}%<br>
         <b>You Get: </b>{{ you_get }}<br>
     </div>
-
+    <a href="{{ packaging_pdf.pdf_url }}">PACKAGING SLIP</a>
+    <br>
     {% if shipped_btn %}
     <button class="btn btn-success shipped">Shipped</button>
     {% endif %}
