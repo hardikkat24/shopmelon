@@ -66,6 +66,12 @@
         <td>Note</td>
         <td>{{ product.note }}</td>
     </tr>
+
+    <tr>
+        <td>Returnable</td>
+        <td>{% if product.is_returnable %}Yes{% else %}No{% endif %}</td>
+    </tr>
+
 </table>
 <br>
 <br>
