@@ -35,4 +35,6 @@ urlpatterns = [
     path('manage-images/<pk>/', views.manage_images, name='manage-images'),
     path('ajax-delete-image/', views.ajax_delete_image, name='ajax-delete-image'),
 
+    path('ajax-get-subcategories/', views.ajax_get_subcategories, name='ajax-get-subcategories'),
+
 ]

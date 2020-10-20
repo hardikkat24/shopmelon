@@ -15,6 +15,7 @@ class Category(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to='product/category/images/', default='default/category_image.jpg')
     is_active = models.BooleanField(default=True)
+    commission = models.IntegerField(null=False, blank=False, default=5) # percentage
 
     def __str__(self):
         return self.name
@@ -32,11 +33,20 @@ class Category(models.Model):
         return
 
 
+class SubCategory(models.Model):
+    name = models.CharField(max_length=50, null=False, blank=False)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
 class Product(models.Model):
     name = models.CharField(max_length=150, null=False, blank=False)
     description = models.TextField()
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True)
     unit_price = models.IntegerField(null=False, blank=False)
     unit_mrp = models.IntegerField(null=False, blank=False)
     is_adult = models.BooleanField(default=False)

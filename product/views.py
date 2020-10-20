@@ -6,7 +6,7 @@ from django.http import HttpResponseNotFound, HttpResponseNotAllowed, JsonRespon
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from product.models import Product, Variant, Tag, Category, ProductImage
+from product.models import Product, Variant, Tag, Category, ProductImage, SubCategory
 from .forms import ProductCreationForm, VariantFormset, VariantFormsetUpdate, TagCreationForm, ProductFilterForm, VariantNewFormset
 
 
@@ -206,6 +206,7 @@ def search(request):
         category_pk = form.cleaned_data['category']
         price_gt = form.cleaned_data['price_gt']
         price_lt = form.cleaned_data['price_lt']
+        sub_category_pk = request.GET.get('sub_category', 0)
 
         # text handling
         if text.strip() != '':
@@ -222,6 +223,13 @@ def search(request):
         if category_pk != '0' and category_pk != '':
             category = Category.objects.get(pk=category_pk)
             products = products.filter(category=category)
+
+        if sub_category_pk != '0' and sub_category_pk != '':
+            try:
+                sub_category = SubCategory.objects.get(pk=sub_category_pk)
+                products = products.filter(sub_category=sub_category)
+            except:
+                pass
 
         if (price_lt is not None and price_lt is not None):
             products = products.filter(unit_price__gte=price_gt, unit_price__lte=price_lt)
@@ -349,3 +357,19 @@ def ajax_delete_tags(request):
 
     product.tags.remove(tag_to_be_removed)
     return JsonResponse({'message': 'yes'})
+
+
+@csrf_exempt
+def ajax_get_subcategories(request):
+    category_pk = request.POST.get('category_pk', None)
+    print(category_pk)
+    try:
+        category = Category.objects.get(pk=category_pk)
+    except:
+        return JsonResponse({'message': 'Invalid category'})
+
+    subcategories = category.subcategory_set.all()
+    print(subcategories)
+    data = [{'id': x.id, 'name': x.name} for x in subcategories]
+
+    return JsonResponse({'message': 'Success', 'data': data})

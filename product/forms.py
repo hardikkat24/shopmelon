@@ -4,6 +4,7 @@ from .models import Product, Variant, Category
 
 try:
     x = list(Category.objects.values_list('id', 'name'))
+    y = [(x, '----') for x in range(20)]
 except:
     x = [('', '')]
 
@@ -39,9 +40,9 @@ VariantFormsetUpdate = modelformset_factory(
 
 class ProductFilterForm(forms.Form):
     text = forms.CharField(required=False)
-    category = forms.ChoiceField(choices=[(0,'-----')]+x, required=False)
     price_gt = forms.DecimalField(label = 'Price from: ', required=False)
     price_lt = forms.DecimalField(label = 'Price to: ', required=False)
+    category = forms.ChoiceField(choices=[(0, '-----')] + x, required=False)
 
 
 VariantNewFormset = inlineformset_factory(Product, Variant, fields=('type', 'name', 'quantity_available', 'image'), can_delete=False, extra=5)

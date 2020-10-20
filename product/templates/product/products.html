@@ -31,6 +31,14 @@ Search
                     </td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <td class="align-top">Sub category</td>
+                    <td>
+                        <select name="sub_category" id="id_sub_category">
+                            <option value="0">----</option>
+                        </select>
+                    </td>
+                </tr>
             </table>
 
             <button type = "submit" class = "btn btn-primary mx-auto">Search</button>
@@ -93,4 +101,75 @@ Search
     </ul>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    
+    $('#id_sub_category').prop({'disabled': true, 'val': ''})
+
+
+        myurl = '/product/ajax-get-subcategories/'
+
+        if($('#id_category').val() === ''){
+            $('#id_sub_category').prop({'disabled': true, 'val': ''})
+        }
+        else{
+            $('#id_sub_category').prop({'disabled': false, 'val': ''})
+
+            $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'category_pk': $('#id_category').val()
+            },
+            dataType: 'json',
+            success: function (data){
+                var newOptions = data.data
+                if (newOptions !== undefined){
+                    var $el = $("#id_sub_category");
+                    $el.empty(); // remove old options
+                    $el.append($("<option></option>").attr("value", '').text('--------'));
+                    newOptions.forEach(function (option){
+                        $el.append($("<option></option>")
+                        .attr("value", option.id).text(option.name));
+                })
+                }
+
+            }
+        })
+        }
+
+
+    $('#id_category').change(function() {
+        myurl = '/product/ajax-get-subcategories/'
+
+        if($(this).val() === ''){
+            $('#id_sub_category').prop({'disabled': true, 'val': ''})
+        }
+        else{
+            $('#id_sub_category').prop({'disabled': false, 'val': ''})
+
+            $.ajax({
+            type: 'POST',
+            url: myurl,
+            data: {
+                'category_pk': $(this).val()
+            },
+            dataType: 'json',
+            success: function (data){
+                var newOptions = data.data
+
+                var $el = $("#id_sub_category");
+                $el.empty(); // remove old options
+                $el.append($("<option></option>").attr("value", '').text('--------'));
+                newOptions.forEach(function (option){
+                    $el.append($("<option></option>")
+                    .attr("value", option.id).text(option.name));
+                })
+            }
+        })
+        }
+    });
+</script>
 {% endblock %}
